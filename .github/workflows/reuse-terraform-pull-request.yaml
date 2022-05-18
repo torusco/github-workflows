@@ -23,6 +23,10 @@ on:
         type: string
         required: true
 
+      TARGET_TERRAFORM_FOLDER_NAME:
+        type: string
+        required: true
+
       USES_CLOUDFLARE:
         type: boolean
         required: true
@@ -78,7 +82,7 @@ jobs:
 
       - name: Terraform Init
         run: |
-          cd terraform
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform --version
           terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure
           terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
@@ -86,5 +90,5 @@ jobs:
 
       - name: Terraform Plan (Please Review Me)
         run: |
-          cd terraform
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform plan -var-file=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/.tfvars -input=false -compact-warnings -refresh-only
