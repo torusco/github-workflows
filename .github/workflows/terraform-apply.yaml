@@ -11,6 +11,10 @@ on:
         type: string
         required: true
 
+      ENVIRONMENT_LONG_NAME:
+        type: string
+        required: true
+
       GITHUB_ENVIRONMENT_GATE:
         type: string
         required: true
