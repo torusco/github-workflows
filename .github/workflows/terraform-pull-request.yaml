@@ -38,12 +38,21 @@ on:
         required: true
         default: false
 
+      USES_STRIPE:
+        type: boolean
+        required: false
+        default: false
+
     secrets:
       # only required if using cloudflare provider
       CLOUDFLARE_API_TOKEN: 
         required: false
 
       CLOUDFLARE_EMAIL:
+        required: false
+
+      # only required if using stripe provider
+      STRIPE_API_KEY:
         required: false
 
 jobs:
@@ -86,6 +95,11 @@ jobs:
           echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
           echo "CLOUDFLARE_EMAIL=${{ secrets.CLOUDFLARE_EMAIL }}" >> $GITHUB_ENV
 
+      - name: Stripe Variables
+        if: "${{ inputs.USES_STRIPE != '' }}"
+        run: |
+          echo "STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}" >> $GITHUB_ENV
+
       - name: Terraform Init
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
@@ -95,18 +109,7 @@ jobs:
           terraform validate
 
       # when not terraform apply, run the plan only with diff params
-      - name: Terraform Plan (Runs on Pull Request)
-        if: "${{ ! inputs.TERRAFORM_APPLY }}"
+      - name: Terraform Plan
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform plan -var-file=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/.tfvars -input=false -compact-warnings -refresh-only
-
-      # when terraform apply, run plan and apply with diff params
-      # how  to add environment gate here?
-      - name: Terraform Plan and Apply (runs on Deploy)
-        if: "${{ inputs.TERRAFORM_APPLY }}"
-        run: |
-          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -input=false -compact-warnings -refresh-only
-          terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
-          terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
