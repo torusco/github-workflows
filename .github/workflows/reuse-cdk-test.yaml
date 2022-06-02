@@ -7,6 +7,10 @@ on:
         type: string
         required: true
 
+      GITHUB_ENVIRONMENT:
+        type: string
+        required: true
+
       CDK_FOLDER_NAME:
         type: string
         required: true
@@ -20,6 +24,7 @@ jobs:
   cdk-test:
 
     runs-on: ubuntu-latest
+    environment: ${{ inputs.GITHUB_ENVIRONMENT }}
     steps:
       - uses: actions/checkout@v2
 
