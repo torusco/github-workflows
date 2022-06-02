@@ -81,7 +81,6 @@ jobs:
       - name: CDK_PREFIX
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
-          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
       - name: Deployer Role
         uses: aws-actions/configure-aws-credentials@v1
