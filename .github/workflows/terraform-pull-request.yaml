@@ -102,6 +102,7 @@ jobs:
           terraform plan -var-file=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/.tfvars -input=false -compact-warnings -refresh-only
 
       # when terraform apply, run plan and apply with diff params
+      # how  to add environment gate here?
       - name: Terraform Plan and Apply (runs on Deploy)
         if: "${{ inputs.TERRAFORM_APPLY }}"
         run: |
