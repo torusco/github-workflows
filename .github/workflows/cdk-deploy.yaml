@@ -78,10 +78,6 @@ jobs:
         run: |
           yarn build
 
-      - name: Yarn Test
-        run: |
-          yarn pipeline:test
-
       - name: CDK_PREFIX
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
