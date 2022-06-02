@@ -1,0 +1,97 @@
+name: "CDK Deploy v1"
+
+on:
+  workflow_call:
+    inputs:
+      AWS_REGION:
+        type: string
+        required: true
+
+      CDK_FOLDER_NAME:
+        type: string
+        required: true
+
+      CDK_PREFIX:
+        type: string
+        required: true
+
+      ENVIRONMENT_LONG_NAME:
+        type: string
+        required: true
+
+      SAML_AWS_ROLE_ARN:
+        type: string
+        required: true
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: true
+
+jobs:
+
+  cdk-deploy:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: saml-to/assume-aws-role@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
+          region: ${{ inputs.AWS_REGION }}
+          provider: awsProduction
+
+      # this registry to be replaced with github packages
+      - name: Yarn Registry
+        env:
+          CODE_ARTIFACT_ACCOUNT: 746354538204
+          CODE_ARTIFACT_REGION: us-east-2
+          CODE_ARTIFACT_URL: https://prod-yarn-746354538204.d.codeartifact.us-east-2.amazonaws.com/npm/prod-torus-common/
+        run: |
+
+          # still call this even though using role?
+          aws codeartifact login --tool npm --repository prod-torus-common --domain prod-yarn --domain-owner ${{ env.CODE_ARTIFACT_ACCOUNT }} --region ${{ env.CODE_ARTIFACT_REGION }}
+
+          # setup yarn per https://docs.aws.amazon.com/codeartifact/latest/ug/npm-yarn.html
+          yarn config set npmRegistryServer "${{ env.CODE_ARTIFACT_URL }}"
+
+          # get token
+          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain prod-yarn --domain-owner ${{ env.CODE_ARTIFACT_ACCOUNT }} --query authorizationToken --region ${{ env.CODE_ARTIFACT_REGION }} --output text` 
+
+          # still required for auth
+          echo "always-auth=true" >> ~/.npmrc
+
+          echo "yarn config!"
+
+          # test
+          yarn config list
+
+      - name: Yarn Install
+        run: |
+          yarn install
+
+      - name: Yarn Build
+        run: |
+          yarn build
+
+      - name: Yarn Test
+        run: |
+          yarn pipeline:test
+
+      - name: CDK_PREFIX
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+
+      - name: Deployer Role
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: CDK Deploy
+        run: |
+          yarn pipeline:deploy

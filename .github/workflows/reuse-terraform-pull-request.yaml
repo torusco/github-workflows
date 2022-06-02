@@ -1,4 +1,4 @@
-name: "Terraform Plan for Pull Requests"
+name: "Terraform Plan for Pull Requests v1"
 
 on:
   workflow_call:
@@ -26,6 +26,12 @@ on:
       TARGET_TERRAFORM_FOLDER_NAME:
         type: string
         required: true
+
+      # true for deploy, false for PRs
+      TERRAFORM_APPLY:
+        type: boolean
+        required: true
+        default: false
 
       USES_CLOUDFLARE:
         type: boolean
@@ -88,7 +94,18 @@ jobs:
           terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
           terraform validate
 
-      - name: Terraform Plan (Please Review Me)
+      # when not terraform apply, run the plan only with diff params
+      - name: Terraform Plan (Runs on Pull Request)
+        if: "${{ ! inputs.TERRAFORM_APPLY }}"
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform plan -var-file=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/.tfvars -input=false -compact-warnings -refresh-only
+
+      # when terraform apply, run plan and apply with diff params
+      - name: Terraform Plan and Apply (runs on Deploy)
+        if: "${{ inputs.TERRAFORM_APPLY }}"
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -input=false -compact-warnings -refresh-only
+          terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
+          terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
