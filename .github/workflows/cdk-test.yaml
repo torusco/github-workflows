@@ -1,4 +1,4 @@
-name: "CDK Deploy v1"
+name: "CDK Tests v1"
 
 on:
   workflow_call:
@@ -11,25 +11,13 @@ on:
         type: string
         required: true
 
-      CDK_PREFIX:
-        type: string
-        required: true
-
-      ENVIRONMENT_LONG_NAME:
-        type: string
-        required: true
-
       SAML_AWS_ROLE_ARN:
-        type: string
-        required: true
-
-      TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
 
 jobs:
 
-  cdk-deploy:
+  cdk-test:
 
     runs-on: ubuntu-latest
     steps:
@@ -80,18 +68,16 @@ jobs:
         run: |
           yarn pipeline:test
 
-      - name: CDK_PREFIX
+      - name: CDK Synth
         run: |
-          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
-          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          export CDK_PREFIX=pullrequest
+          yarn synth
 
-      - name: Deployer Role
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-          aws-region: ${{ inputs.AWS_REGION }}
-          role-duration-seconds: 3600
-
-      - name: CDK Deploy
+      - name: Install cfn_nag
         run: |
-          yarn pipeline:deploy
+          sudo gem install cfn-nag
+
+      - name: cfn_nag
+        run: |
+          cfn_nag_scan --input-path ${{ inputs.CDK_FOLDER_NAME }}/cdk.out/*.template.json
+

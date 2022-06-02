@@ -1,4 +1,4 @@
-name: "CDK Tests v1"
+name: "CDK Deploy v1"
 
 on:
   workflow_call:
@@ -7,24 +7,33 @@ on:
         type: string
         required: true
 
-      GITHUB_ENVIRONMENT:
+      CDK_FOLDER_NAME:
         type: string
         required: true
 
-      CDK_FOLDER_NAME:
+      CDK_PREFIX:
         type: string
+        required: true
+
+      GITHUB_ENVIRONMENT_GATE:
+        type: string
+        description: "a string that matches the GitHub Environment for this repository, acts as a deployment block"
         required: true
 
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
 
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: true
+
 jobs:
 
-  cdk-test:
+  cdk-deploy:
 
     runs-on: ubuntu-latest
-    environment: ${{ inputs.GITHUB_ENVIRONMENT }}
+    environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
       - uses: actions/checkout@v2
 
@@ -73,16 +82,18 @@ jobs:
         run: |
           yarn pipeline:test
 
-      - name: CDK Synth
+      - name: CDK_PREFIX
         run: |
-          export CDK_PREFIX=pullrequest
-          yarn synth
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
-      - name: Install cfn_nag
+      - name: Deployer Role
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: CDK Deploy
         run: |
-          sudo gem install cfn-nag
-
-      - name: cfn_nag
-        run: |
-          cfn_nag_scan --input-path ${{ inputs.CDK_FOLDER_NAME }}/cdk.out/*.template.json
-
+          yarn pipeline:deploy
