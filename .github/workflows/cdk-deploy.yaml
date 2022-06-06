@@ -1,4 +1,4 @@
-name: "CDK Deploy v1"
+name: "CDK Deploy v2"
 
 on:
   workflow_call:
@@ -32,7 +32,7 @@ on:
       YARN_FOLDER_NAME:
         description: "use this folder repos that contain a series of cdk- folders but no parent and yarn needs to run within the cdk- folder not the root"
         type: string
-        required: false
+        required: true
         default: "."
 
 jobs:
