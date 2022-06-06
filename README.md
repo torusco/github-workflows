@@ -19,7 +19,7 @@ thank you!
 ### v1
 
 ```
-  integration-ai1:
+  integration1:
     needs: [ globals ]
     uses: torusinc/github-workflows/.github/workflows/cdk-diff.yaml@v1
     with:
@@ -28,7 +28,7 @@ thank you!
       CDK_PREFIX: ai1
       ENVIRONMENT_LONG_NAME: "integration"
       SAML_AWS_ROLE_ARN: ${{ needs.globals.outputs.SAML_AWS_ROLE_ARN }}
-      TARGET_AWS_ACCOUNT_ROLE_ARN: "arn:aws:iam::206272298119:role/gha-app-deployer-1"
+      TARGET_AWS_ACCOUNT_ROLE_ARN: "arn:aws:iam::${{ needs.globals.outputs.ACCOUNT_NUMBER }}:role/gha-app-deployer-1"
 ```
 ## cdk-test
 
