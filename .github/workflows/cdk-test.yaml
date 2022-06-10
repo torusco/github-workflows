@@ -71,6 +71,8 @@ jobs:
         run: |
           ls
           yarn pipeline:test
+          ls ./coverage
+          cat ./coverage/lcov.info
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
