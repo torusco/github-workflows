@@ -15,11 +15,11 @@ on:
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
-      RUN_SONAR_CLOUD:
+      USES_SONAR_CLOUD:
         type: boolean
         required: false
     secrets:
-      # only required if using RUN_SONAR_CLOUD = true
+      # only required if using USES_SONAR_CLOUD = true
       SONAR_TOKEN:
         required: false
 
@@ -77,8 +77,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
-        with:
-          projectBaseDir: /home/runner/work/account/account
+        if: "${{ inputs.USES_SONAR_CLOUD != '' }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
