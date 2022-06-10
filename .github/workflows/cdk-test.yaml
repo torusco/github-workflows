@@ -69,10 +69,9 @@ jobs:
           yarn pipeline:test
 
       - name: SonarCloud Scan
-        if: "${{ inputs.RUN_SONAR_CLOUD != '' }}"
         uses: SonarSource/sonarcloud-github-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: CDK Synth
