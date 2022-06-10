@@ -18,6 +18,10 @@ on:
       RUN_SONAR_CLOUD:
         type: boolean
         required: false
+    secrets:
+      # only required if using RUN_SONAR_CLOUD = true
+      SONAR_TOKEN:
+        required: false
 
 jobs:
 
