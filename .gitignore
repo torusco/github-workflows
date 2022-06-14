@@ -1,0 +1,3 @@
+#IntelliJ
+.idea
+.github/workflows/cdk-deploy copy.yaml
