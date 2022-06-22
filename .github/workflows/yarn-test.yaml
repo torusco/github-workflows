@@ -82,6 +82,13 @@ jobs:
         run: |
           yarn pipeline:test-unit
 
+      - name: Yarn Integration Test
+        if: "${{ inputs.INTEGRATION_TEST_ENVIRONENT != '' }}"
+        run: |
+          export CDK_PREFIX=${{ inputs.INTEGRATION_TEST_ENVIRONENT}}
+          echo $CDK_PREFIX
+          yarn pipeline:test-integration
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         if: "${{ inputs.USES_SONAR_CLOUD != '' }}"
