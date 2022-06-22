@@ -1,9 +1,10 @@
-name: "CDK Tests v3"
+name: "Pull Request Tests v3"
 
 # Release Notes v3
+#   based on cdk-test but does more than just test cdk so renamed pr-test
 #   Runs CDK Nag instead of CFN Nag - if CDK Nag is enabled for the target
-#   Run Unit Tests (no environment)
-#   Run Integration Tests (against provided environment) if INTEGRATION_TEST_ENVIRONENT is provided
+#   Run Jest Unit Tests (no environment)
+#   Run Jest Integration Tests (against provided environment) if INTEGRATION_TEST_ENVIRONENT is provided
 
 on:
   workflow_call:
