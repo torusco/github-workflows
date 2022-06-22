@@ -4,7 +4,8 @@ name: "Yarn Pull Request Tests v3"
 #   based on cdk-test but does more than just test cdk so renamed yarn-test
 #   Runs CDK Nag instead of CFN Nag - if CDK Nag is enabled for the target
 #   Run Jest Unit Tests (no environment)
-#   Run Jest Integration Tests (against provided environment) if INTEGRATION_TEST_ENVIRONENT is provided
+#   Run Jest Integration Tests (against provided environment) if USES_INTEGRATION_TEST is provided
+#     INTEGRATION_TEST_ENVIRONENT AND TARGET_AWS_ACCOUNT_ROLE_ARN
 
 on:
   workflow_call:
@@ -25,10 +26,19 @@ on:
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: false
       
       USES_SONAR_CLOUD:
         type: boolean
         required: false
+
+      USES_INTEGRATION_TEST:
+        type: boolean
+        required: false
+
 
     secrets:
       # only required if using USES_SONAR_CLOUD = true
@@ -82,13 +92,6 @@ jobs:
         run: |
           yarn pipeline:test-unit
 
-      - name: Yarn Integration Test
-        if: "${{ inputs.INTEGRATION_TEST_ENVIRONENT != '' }}"
-        run: |
-          export CDK_PREFIX=${{ inputs.INTEGRATION_TEST_ENVIRONENT}}
-          echo $CDK_PREFIX
-          yarn pipeline:test-integration
-
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         if: "${{ inputs.USES_SONAR_CLOUD != '' }}"
@@ -100,5 +103,21 @@ jobs:
         run: |
           export CDK_PREFIX=pullrequest
           yarn synth
+
+      - name: Integration Test Role
+        if: "${{ inputs.USES_INTEGRATION_TEST != '' }}"
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Yarn Integration Test
+        if: "${{ inputs.USES_INTEGRATION_TEST != '' }}"
+        run: |
+          export CDK_PREFIX=${{ inputs.INTEGRATION_TEST_ENVIRONENT}}
+          echo $CDK_PREFIX
+          yarn pipeline:test-integration
+
 
 
