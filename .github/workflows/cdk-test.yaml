@@ -1,4 +1,9 @@
-name: "CDK Tests v2"
+name: "CDK Tests v3"
+
+# Release Notes v3
+#   Runs CDK Nag instead of CFN Nag - if CDK Nag is enabled for the target
+#   Run Unit Tests (no environment)
+#   Run Integration Tests (against provided environment) if INTEGRATION_TEST_ENVIRONENT is provided
 
 on:
   workflow_call:
@@ -12,12 +17,18 @@ on:
         type: string
         required: true
 
+      INTEGRATION_TEST_ENVIRONENT:
+        type: string
+        required: false
+
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
+      
       USES_SONAR_CLOUD:
         type: boolean
         required: false
+
     secrets:
       # only required if using USES_SONAR_CLOUD = true
       SONAR_TOKEN:
@@ -60,20 +71,15 @@ jobs:
 
       - name: Yarn Install
         run: |
-          # if no .npmrc in repo, fail
           yarn install
 
       - name: Yarn Build
         run: |
           yarn build
 
-      - name: Yarn Test
+      - name: Yarn Unit Test
         run: |
-          ls
-          yarn pipeline:test
-          ls ./coverage
-          cat ./coverage/lcov.info
-          pwd
+          yarn pipeline:test-unit
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -82,16 +88,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: CDK Synth
+      - name: CDK Synth with CDK Nag
         run: |
           export CDK_PREFIX=pullrequest
           yarn synth
 
-      - name: Install cfn_nag
-        run: |
-          sudo gem install cfn-nag
-
-      - name: cfn_nag
-        run: |
-          cfn_nag_scan --input-path ${{ inputs.CDK_FOLDER_NAME }}/cdk.out/*.template.json
 
