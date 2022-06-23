@@ -116,8 +116,7 @@ jobs:
         if: "${{ inputs.USES_INTEGRATION_TEST != '' }}"
         run: |
           export CDK_PREFIX=${{ inputs.INTEGRATION_TEST_ENVIRONENT}}
-          echo $CDK_PREFIX
-          yarn pipeline:test-integration
+          yarn pipeline:test-int
 
 
 
