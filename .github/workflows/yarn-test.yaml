@@ -88,11 +88,7 @@ jobs:
         run: |
           yarn build
 
-      - name: Yarn Test
-        run: |
-          yarn test
-
-      - name: Yarn Pipeline Unit Test
+      - name: Yarn Unit Test
         run: |
           yarn pipeline:test-unit
 
