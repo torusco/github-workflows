@@ -56,7 +56,7 @@ jobs:
   terraform:
 
     runs-on: ubuntu-latest
-    environment: $${{ inputs.GITHUB_ENVIRONMENT_GATE }}
+    environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
       - uses: actions/checkout@v2
 
