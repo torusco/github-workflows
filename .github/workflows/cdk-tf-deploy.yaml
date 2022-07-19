@@ -134,6 +134,7 @@ jobs:
 
   terraform-apply:
 
+    needs: [cdk-deploy]
     runs-on: ubuntu-latest
     environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
