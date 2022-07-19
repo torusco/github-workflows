@@ -15,9 +15,11 @@ on:
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
+
       USES_SONAR_CLOUD:
         type: boolean
         required: false
+        
     secrets:
       # only required if using USES_SONAR_CLOUD = true
       SONAR_TOKEN:
