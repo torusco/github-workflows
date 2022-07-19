@@ -40,7 +40,7 @@ on:
       YARN_FOLDER_NAME:
         description: "use this folder repos that contain a series of cdk- folders but no parent and yarn needs to run within the cdk- folder not the root"
         type: string
-        required: true
+        required: false
         default: "."
 
       # put uses flags at end
