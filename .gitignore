@@ -1,3 +1,4 @@
 #IntelliJ
 .idea
 .github/workflows/cdk-deploy copy.yaml
+.github/.DS_Store
