@@ -13,6 +13,7 @@ on:
         required: true
 
       CDK_PREFIX:
+        description: environment instance name is used to select the environment gate and to deploy CDK and Terraform code
         type: string
         required: true
 
@@ -60,8 +61,15 @@ on:
 
 jobs:
 
-  cdk-deploy:
+  environment_gate:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.CDK_PREFIX }}
+    steps:
+      - run: echo "environment gate"
 
+  cdk_deploy:
+
+    needs: environment_check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -126,9 +134,9 @@ jobs:
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn pipeline:deploy
 
-  terraform-apply:
+  terraform_apply:
 
-    needs: [cdk-deploy]
+    needs: cdk_deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -183,3 +191,9 @@ jobs:
           terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -input=false -compact-warnings -refresh-only
           terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
+
+  integration_test:
+    needs: terraform_apply
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "todo integration test here"
