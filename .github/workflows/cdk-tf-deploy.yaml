@@ -20,11 +20,6 @@ on:
         type: string
         required: true
 
-      GITHUB_ENVIRONMENT_GATE:
-        description: "a string that matches the GitHub Environment for this repository, acts as a deployment block"
-        type: string
-        required: true
-
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
@@ -68,7 +63,6 @@ jobs:
   cdk-deploy:
 
     runs-on: ubuntu-latest
-    environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
       - uses: actions/checkout@v2
 
@@ -136,7 +130,6 @@ jobs:
 
     needs: [cdk-deploy]
     runs-on: ubuntu-latest
-    environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
       - uses: actions/checkout@v2
 
