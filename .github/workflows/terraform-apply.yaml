@@ -121,6 +121,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          slack-message: "message"
           payload: |
             {
               "text" : "Terraform Plan Starting: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
@@ -140,6 +141,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          slack-message: "message"
           payload: |
             {
               "text" : "Terraform Apply Complete: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
