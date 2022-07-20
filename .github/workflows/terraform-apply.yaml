@@ -116,14 +116,14 @@ jobs:
           terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
           terraform validate
 
-      - name: slack terraform
+      - name: Slack Terraform Start
         if: "${{ inputs.USES_SLACK != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : "deploying ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}
+              "text" : "Terraform Plan Starting: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_NOTIFY_BOT }}
@@ -134,3 +134,15 @@ jobs:
           terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -input=false -compact-warnings -refresh-only
           terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
+
+      - name: Slack Terraform Complete
+        if: "${{ inputs.USES_SLACK != '' }}"
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Apply Complete: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_NOTIFY_BOT }}
