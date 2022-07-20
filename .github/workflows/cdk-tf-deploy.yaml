@@ -137,10 +137,34 @@ jobs:
           aws-region: ${{ inputs.AWS_REGION }}
           role-duration-seconds: 3600
 
+      - name: Slack CDK Start
+        if: "${{ inputs.USES_SLACK != '' }}"
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "CDK Deploy Starting: ${{ inputs.CDK_FOLDER_NAME }} to ${{ env.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
       - name: CDK Deploy
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn pipeline:deploy
+
+      - name: Slack CDK Complete
+        if: "${{ inputs.USES_SLACK != '' }}"
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "CDK Deploy Complete: ${{ inputs.CDK_FOLDER_NAME }} to ${{ env.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   terraform_apply:
 
@@ -199,7 +223,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : "Terraform Plan Starting: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
+              "text" : "Terraform Plan Starting: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -218,7 +242,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : "Terraform Apply Complete: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
+              "text" : "Terraform Apply Complete: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ env.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
