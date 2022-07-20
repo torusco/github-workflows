@@ -60,6 +60,7 @@ on:
       STRIPE_API_KEY: 
         required: false
 
+      # only required if using slack provider
       SLACK_BOT_TOKEN:
         required: false
 

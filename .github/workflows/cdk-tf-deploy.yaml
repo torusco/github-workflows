@@ -25,6 +25,10 @@ on:
         type: string
         required: true
 
+      SLACK_CHANNEL_ID:
+        type: string
+        required: false
+
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
@@ -57,6 +61,10 @@ on:
 
       # only required if using stripe provider
       STRIPE_API_KEY: 
+        required: false
+
+      # only required if using slack provider
+      SLACK_BOT_TOKEN:
         required: false
 
 jobs:
@@ -183,7 +191,18 @@ jobs:
           terraform --version
           terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure
           terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
-          terraform validate
+
+      - name: Slack Terraform Start
+        if: "${{ inputs.USES_SLACK != '' }}"
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Plan Starting: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Terraform Plan and Apply
         run: |
@@ -191,6 +210,18 @@ jobs:
           terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -input=false -compact-warnings -refresh-only
           terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
+
+      - name: Slack Terraform Complete
+        if: "${{ inputs.USES_SLACK != '' }}"
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Apply Complete: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   integration_test:
     needs: terraform_apply
