@@ -41,11 +41,6 @@ on:
         required: false
         default: false
 
-      USES_SLACK:
-        type: boolean
-        required: false
-        default: false
-
       USES_STRIPE:
         type: boolean
         required: false
@@ -118,7 +113,7 @@ jobs:
           terraform validate
 
       - name: Slack Terraform Start
-        if: "${{ inputs.USES_SLACK != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
@@ -137,7 +132,7 @@ jobs:
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
 
       - name: Slack Terraform Complete
-        if: "${{ inputs.USES_SLACK != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}

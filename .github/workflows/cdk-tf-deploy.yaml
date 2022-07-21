@@ -138,7 +138,7 @@ jobs:
           role-duration-seconds: 3600
 
       - name: Slack CDK Start
-        if: "${{ inputs.USES_SLACK != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
@@ -155,7 +155,7 @@ jobs:
           yarn pipeline:deploy
 
       - name: Slack CDK Complete
-        if: "${{ inputs.USES_SLACK != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
@@ -217,7 +217,7 @@ jobs:
           terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
 
       - name: Slack Terraform Start
-        if: "${{ inputs.USES_SLACK != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
@@ -236,7 +236,7 @@ jobs:
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
 
       - name: Slack Terraform Complete
-        if: "${{ inputs.USES_SLACK != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
