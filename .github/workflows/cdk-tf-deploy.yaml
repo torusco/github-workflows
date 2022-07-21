@@ -144,7 +144,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : "CDK Deploy Starting: ${{ inputs.CDK_FOLDER_NAME }} to ${{ env.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+              "text" : "CDK Deploy Starting: ${{ inputs.CDK_FOLDER_NAME }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -161,7 +161,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : "CDK Deploy Complete: ${{ inputs.CDK_FOLDER_NAME }} to ${{ env.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+              "text" : "CDK Deploy Complete: ${{ inputs.CDK_FOLDER_NAME }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -223,7 +223,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : "Terraform Plan Starting: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+              "text" : "Terraform Plan Starting: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -242,7 +242,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : "Terraform Apply Complete: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ env.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+              "text" : "Terraform Apply Complete: ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
