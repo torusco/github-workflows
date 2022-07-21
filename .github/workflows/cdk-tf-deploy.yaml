@@ -77,7 +77,7 @@ jobs:
 
   cdk_deploy:
 
-    needs: environment_check
+    needs: environment_gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
