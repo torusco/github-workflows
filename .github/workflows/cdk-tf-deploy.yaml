@@ -30,6 +30,12 @@ on:
         type: string
         required: false
 
+      RUN_INTEGRATION_TESTS:
+        type: boolean
+        required: false
+        default: false
+        description: "should integration tests be run on this environment?  typically false for preprod/production and true everywhere else"
+
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
@@ -254,11 +260,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: |
+      - name: Run Integration tests
+        if: "${{ inputs.RUN_INTEGRATION_TESTS != '' }}"
+        run: |
           yarn pipeline:test-int
 
       - name: Slack Integration Test Complete
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }} && ${{ inputs.RUN_INTEGRATION_TESTS != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
