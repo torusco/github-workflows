@@ -251,4 +251,4 @@ jobs:
     needs: terraform_apply
     runs-on: ubuntu-latest
     steps:
-      - run: echo "todo integration test here"
+      - run: echo "todo integration test here move to v4 when pipeline:test-int is implemented"
