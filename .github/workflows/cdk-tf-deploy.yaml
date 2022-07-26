@@ -19,6 +19,7 @@ on:
         required: true
 
       ENVIRONMENT_LONG_NAME:
+        # consider CDK_ENVIRONMENT_LONG_NAME
         type: string
         required: true
 
@@ -307,9 +308,10 @@ jobs:
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn build
 
-      - name: CDK_PREFIX
+      - name: CDK_PREFIX CDK_ENVIRONMENT_LONG_NAME
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "CDK_ENVIRONMENT_LONG_NAME=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
       - name: Deployer Role
         uses: aws-actions/configure-aws-credentials@v1
