@@ -326,7 +326,7 @@ jobs:
           yarn pipeline:test-int
 
       - name: Slack Integration Test Complete
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' }} && ${{ inputs.RUN_INTEGRATION_TESTS != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.RUN_INTEGRATION_TESTS != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
