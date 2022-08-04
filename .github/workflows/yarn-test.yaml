@@ -1,0 +1,110 @@
+name: "Yarn Pull Request Tests v4"
+
+# Release Notes v4
+#   switches to github package manager
+
+on:
+  workflow_call:
+    inputs:
+    
+      AWS_REGION:
+        type: string
+        required: true
+
+      CDK_FOLDER_NAME:
+        type: string
+        required: true
+
+      INTEGRATION_TEST_ENVIRONENT:
+        type: string
+        required: false
+
+      SAML_AWS_ROLE_ARN:
+        type: string
+        required: true
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: false
+      
+      USES_SONAR_CLOUD:
+        type: boolean
+        required: false
+
+      USES_INTEGRATION_TEST:
+        type: boolean
+        required: false
+
+      USES_CDK_NAG: 
+        type: boolean
+        default: false 
+        required: false
+
+    secrets:
+      # only required if using USES_SONAR_CLOUD = true
+      SONAR_TOKEN:
+        required: false
+
+      # required for using github package manager
+      NPM_TOKEN:
+        required: true
+
+jobs:
+
+  cdk-test:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: saml-to/assume-aws-role@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
+          region: ${{ inputs.AWS_REGION }}
+          provider: awsProduction
+
+      - name: Yarn Install
+        run: |
+          yarn install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Yarn Build
+        run: |
+          yarn build
+
+      - name: Yarn Unit Test
+        run: |
+          yarn pipeline:test-unit
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        if: "${{ inputs.USES_SONAR_CLOUD != '' }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: CDK Synth with CDK Nag
+        if: "${{ inputs.USES_CDK_NAG != '' }}"
+        run: |
+          export CDK_PREFIX=pullrequest
+          yarn synth
+
+      - name: Integration Test Role
+        if: "${{ inputs.USES_INTEGRATION_TEST != '' }}"
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Yarn Integration Test
+        if: "${{ inputs.USES_INTEGRATION_TEST != '' }}"
+        run: |
+          export CDK_PREFIX=${{ inputs.INTEGRATION_TEST_ENVIRONENT}}
+          yarn pipeline:test-int
+
+
+
