@@ -33,18 +33,18 @@ on:
 
       USES_SONAR_CLOUD:
         type: boolean
-        default: 'true' 
+        default: true
         required: false
 
       USES_SONAR_CLOUD_MAIN_ANALYSIS:
         type: boolean
-        default: 'false' 
+        default: false
         required: false
         description: "override the branch from the event, and run on main, use with USES_SONAR_CLOUD for sonar cloud main analysis "
 
       USES_CDK_NAG: 
         type: boolean
-        default: 'false' 
+        default: false
         required: false
 
     secrets:
