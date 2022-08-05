@@ -31,6 +31,11 @@ on:
         type: boolean
         required: false
 
+      USES_SONAR_CLOUD:
+        type: boolean
+        default: true 
+        required: false
+
       USES_CDK_NAG: 
         type: boolean
         default: false 
@@ -78,7 +83,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
-        if: "${{ secrets.SONAR_TOKEN != '' }}"
+        if: "${{ inputs.USES_SONAR_CLOUD != '' }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
