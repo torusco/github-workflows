@@ -36,6 +36,12 @@ on:
         default: true 
         required: false
 
+      USES_SONAR_CLOUD_MAIN_ANALYSIS:
+        type: boolean
+        default: false 
+        required: false
+        description: "override the branch from the event, and run on main, use with USES_SONAR_CLOUD for sonar cloud main analysis "
+
       USES_CDK_NAG: 
         type: boolean
         default: false 
@@ -55,9 +61,22 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+
       - uses: actions/checkout@v3
+        if: "${{ inputs.USES_SONAR_CLOUD == 'true' && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == 'true'}}"
         with: 
           fetch-depth: 0     # sonar cloud - Number of commits to fetch. 0 indicates all history for all branches and tags.
+          ref: main  # we want to force the ref to main
+
+      - uses: actions/checkout@v3
+        if: "${{ inputs.USES_SONAR_CLOUD == 'true' && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == 'false'}}"
+        with: 
+          fetch-depth: 0     # sonar cloud - Number of commits to fetch. 0 indicates all history for all branches and tags.
+          # will take ref from the event (PR branch)
+
+      - uses: actions/checkout@v3
+        if: "${{ inputs.USES_SONAR_CLOUD == 'false' }}"
+        # clean regular checkout, no sonar cloud, no refs
 
       - uses: saml-to/assume-aws-role@v1
         env:
