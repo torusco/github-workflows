@@ -83,7 +83,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
+      - name: use github as yarn registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com/'
+          always-auth: true
+          scope: '@torusco'
+          
       - uses: saml-to/assume-aws-role@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
