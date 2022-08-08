@@ -1,0 +1,86 @@
+name: "CDK Diff v4"
+
+# Release Notes v4
+#   switches to github package manager
+
+on:
+  workflow_call:
+    inputs:
+
+      AWS_REGION:
+        type: string
+        required: true
+
+      CDK_FOLDER_NAME:
+        type: string
+        required: true
+
+      CDK_PREFIX:
+        type: string
+        required: true
+
+      ENVIRONMENT_LONG_NAME:
+        type: string
+        required: true
+
+      SAML_AWS_ROLE_ARN:
+        type: string
+        required: true
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: true
+
+    secrets:
+      # required for using github package manager
+      NPM_TOKEN:
+        required: true
+
+jobs:
+
+  cdk-diff:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with: 
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+
+      - uses: saml-to/assume-aws-role@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
+          region: ${{ inputs.AWS_REGION }}
+          provider: awsProduction
+
+      - name: use github as yarn registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com/'
+          always-auth: true
+          scope: '@torusco'
+
+      - name: Yarn install && yarn build
+        run: |
+          yarn install
+          yarn build
+
+      - name: CDK_PREFIX
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+
+      - name: Deployer Role
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: CDK Diff
+        run: |
+          yarn pipeline:diff
+
+
