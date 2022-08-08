@@ -101,15 +101,12 @@ jobs:
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
 
-      - name: Yarn Install
+      - name: yarn install && yarn build
         run: |
           yarn install
+          yarn build
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Yarn Build
-        run: |
-          yarn build
 
       - name: Yarn Unit Test
         run: |

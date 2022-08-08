@@ -62,10 +62,12 @@ jobs:
           always-auth: true
           scope: '@torusco'
 
-      - name: Yarn install && yarn build
+      - name: yarn install && yarn build
         run: |
           yarn install
           yarn build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: CDK_PREFIX
         run: |

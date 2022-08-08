@@ -102,17 +102,13 @@ jobs:
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
 
-      - name: Yarn Install
+      - name: yarn install && yarn build
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn install
+          yarn build
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Yarn Build
-        run: |
-          cd ${{ inputs.YARN_FOLDER_NAME }}
-          yarn build
 
       - name: CDK_PREFIX
         run: |
