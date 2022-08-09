@@ -150,6 +150,18 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
+      - name: Slack CDK Failure
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "CDK Deploy Failed: ${{ inputs.CDK_FOLDER_NAME }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
   integration_test:
     needs: cdk_deploy
     runs-on: ubuntu-latest
