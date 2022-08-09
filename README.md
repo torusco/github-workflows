@@ -21,7 +21,7 @@ thank you!
 ```
   integration1:
     needs: [ globals ]
-    uses: torusinc/github-workflows/.github/workflows/cdk-diff.yaml@v1
+    uses: torusco/github-workflows/.github/workflows/cdk-diff.yaml@v1
     with:
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_FOLDER_NAME: cdk-account
@@ -37,7 +37,7 @@ thank you!
 ```
   yarn-test:
     needs: globals
-    uses: torusinc/github-workflows/.github/workflows/cdk-test.yaml@v1
+    uses: torusco/github-workflows/.github/workflows/cdk-test.yaml@v1
     with:
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_FOLDER_NAME: cdk-account
