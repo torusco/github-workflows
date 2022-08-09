@@ -274,7 +274,17 @@ jobs:
     steps:
 
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
+      - name: use github as yarn registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com/'
+          always-auth: true
+          scope: '@torusco'
+          
       - uses: saml-to/assume-aws-role@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -283,41 +293,13 @@ jobs:
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
 
-      # this registry to be replaced with github packages
-      - name: Yarn Registry
-        env:
-          CODE_ARTIFACT_ACCOUNT: 746354538204
-          CODE_ARTIFACT_REGION: us-east-2
-          CODE_ARTIFACT_URL: https://prod-yarn-746354538204.d.codeartifact.us-east-2.amazonaws.com/npm/prod-torus-common/
-        run: |
-          cd ${{ inputs.YARN_FOLDER_NAME }}
-
-          # still call this even though using role?
-          aws codeartifact login --tool npm --repository prod-torus-common --domain prod-yarn --domain-owner ${{ env.CODE_ARTIFACT_ACCOUNT }} --region ${{ env.CODE_ARTIFACT_REGION }}
-
-          # setup yarn per https://docs.aws.amazon.com/codeartifact/latest/ug/npm-yarn.html
-          yarn config set npmRegistryServer "${{ env.CODE_ARTIFACT_URL }}"
-
-          # get token
-          export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain prod-yarn --domain-owner ${{ env.CODE_ARTIFACT_ACCOUNT }} --query authorizationToken --region ${{ env.CODE_ARTIFACT_REGION }} --output text` 
-
-          # still required for auth
-          echo "always-auth=true" >> ~/.npmrc
-
-          echo "yarn config!"
-
-          # test
-          yarn config list
-
-      - name: Yarn Install
+      - name: yarn install && yarn build
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn install
-
-      - name: Yarn Build
-        run: |
-          cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: CDK_PREFIX CDK_ENVIRONMENT_LONG_NAME
         run: |
@@ -344,6 +326,21 @@ jobs:
           payload: |
             {
               "text" : "Integration Test Complete: vars here... ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Slack Integration Test Failed
+        if: |
+          "${{ failure() && 
+          inputs.SLACK_CHANNEL_ID != '' && 
+          inputs.RUN_INTEGRATION_TESTS != '' }}"
+        uses: slackapi/slack-github-action@v1.19.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Integration Test Failed: ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
