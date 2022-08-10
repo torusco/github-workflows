@@ -332,9 +332,11 @@ jobs:
 
       - name: Slack Integration Test Failed
         if: |
-          "${{ failure() && 
+          "${{ 
+          inputs.RUN_INTEGRATION_TESTS != '' &&
           inputs.SLACK_CHANNEL_ID != '' && 
-          inputs.RUN_INTEGRATION_TESTS != '' }}"
+          failure()
+           }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
