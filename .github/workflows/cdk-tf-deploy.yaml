@@ -313,36 +313,4 @@ jobs:
           aws-region: ${{ inputs.AWS_REGION }}
           role-duration-seconds: 3600
           
-      - name: Run Integration tests
-        if: "${{ inputs.RUN_INTEGRATION_TESTS != '' }}"
-        run: |
-          yarn pipeline:test-int
-
-      - name: Slack Integration Test Complete
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.RUN_INTEGRATION_TESTS != '' }}"
-        uses: slackapi/slack-github-action@v1.19.0
-        with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text" : "Integration Test Complete: ${{ github.event.repository.name }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
-      - name: Slack Integration Test Failed
-        if: |
-          "${{ 
-          inputs.RUN_INTEGRATION_TESTS != '' &&
-          inputs.SLACK_CHANNEL_ID != '' && 
-          failure()
-           }}"
-        uses: slackapi/slack-github-action@v1.19.0
-        with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          payload: |
-            {
-              "text" : "Integration Test Failed: ${{ github.event.repository.name }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+ 

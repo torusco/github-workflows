@@ -352,8 +352,3 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-  integration_test:
-    needs: terraform_apply_after
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "todo integration test here move to v4 when pipeline:test-int is implemented"
