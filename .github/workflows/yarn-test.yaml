@@ -115,7 +115,7 @@ jobs:
       - name: SonarCloud Set Main
         if: "${{ inputs.USES_SONAR_CLOUD == true && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == true }}"
         run: |
-          echo "sonar.branch.name=main" >> sonar-project.properties
+          echo "\nsonar.branch.name=main" >> sonar-project.properties
           cat sonar-project.properties
 
       - name: SonarCloud Scan
