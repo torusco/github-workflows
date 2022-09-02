@@ -2,6 +2,7 @@ name: "CDK Diff v4"
 
 # Release Notes v4
 #   switches to github package manager
+#   can also handle cdk global
 
 on:
   workflow_call:
@@ -30,6 +31,11 @@ on:
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
+
+      USES_GLOBAL:
+        type: boolean
+        required: false
+        default: false
 
     secrets:
       # required for using github package manager
@@ -82,7 +88,15 @@ jobs:
           role-duration-seconds: 3600
 
       - name: CDK Diff
+        if: "${{ inputs.USES_GLOBAL == false }}"
         run: |
+          cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn pipeline:diff
+
+      - name: CDK Diff Global
+        if: "${{ inputs.USES_GLOBAL == true }}"
+        run: |
+          cd ${{ inputs.YARN_FOLDER_NAME }}
+          yarn pipeline:global:diff
 
 

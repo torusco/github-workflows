@@ -52,6 +52,11 @@ on:
         required: false
         default: false
 
+      USES_GLOBAL:
+        type: boolean
+        required: false
+        default: false
+
     secrets:
       # only required if using cloudflare provider
       CLOUDFLARE_API_TOKEN: 
@@ -134,9 +139,16 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: CDK Deploy
+        if: "${{ inputs.USES_GLOBAL == false }}"
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn pipeline:deploy
+
+      - name: CDK Deploy Global
+        if: "${{ inputs.USES_GLOBAL == true }}"
+        run: |
+          cd ${{ inputs.YARN_FOLDER_NAME }}
+          yarn pipeline:global:deploy
 
       - name: Slack CDK Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
