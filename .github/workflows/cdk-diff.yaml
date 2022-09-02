@@ -90,13 +90,11 @@ jobs:
       - name: CDK Diff
         if: "${{ inputs.USES_GLOBAL == false }}"
         run: |
-          cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn pipeline:diff
 
       - name: CDK Diff Global
         if: "${{ inputs.USES_GLOBAL == true }}"
         run: |
-          cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn pipeline:global:diff
 
 
