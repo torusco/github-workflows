@@ -76,7 +76,7 @@ jobs:
         with:
           filters: |
             tf-folder:
-              - ${{ TARGET_TERRAFORM_FOLDER_NAME }}/**
+              - ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}/**
 
       - if: steps.changes.outputs.tf-folder == 'true'
         run: |
