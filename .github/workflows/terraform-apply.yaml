@@ -78,7 +78,7 @@ jobs:
             tf-folder:
               - ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}/**
 
-      - if: steps.changes.outputs.tf-folder == 'true'
+      - if: steps.changes.outputs.tf-folder == 'false'
         run: |
           echo "Cancel workflow because relevant files did not change"
           exit 0
