@@ -2,6 +2,7 @@ name: "Terraform Apply v4"
 
 # v4 - slack updates
 # v4 - filter by TARGET_TERRAFORM_FOLDER_NAME
+# v4 - Node.js 16 fix
 
 on:
   workflow_call:
@@ -69,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Filter By TARGET_TERRAFORM_FOLDER_NAME
         uses: dorny/paths-filter@v2.11.1
