@@ -1,6 +1,7 @@
 name: "Terraform Apply v4"
 
 # v4 - slack updates
+# v4 - filter by TARGET_TERRAFORM_FOLDER_NAME
 
 on:
   workflow_call:
@@ -69,6 +70,18 @@ jobs:
     environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
       - uses: actions/checkout@v2
+
+      - name: Filter By TARGET_TERRAFORM_FOLDER_NAME
+        uses: dorny/paths-filter@v2.11.1
+        with:
+          filters: |
+            tf-folder:
+              - ${{ TARGET_TERRAFORM_FOLDER_NAME }}/**
+
+      - if: steps.changes.outputs.tf-folder == 'true'
+        run: |
+          echo "Cancel workflow because relevant files did not change"
+          exit 0
 
       - uses: saml-to/assume-aws-role@v1
         env:
