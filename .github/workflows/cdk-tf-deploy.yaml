@@ -155,13 +155,13 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - uses: actions/cache@v3
-        id: cdk_deploy_cache
-        with:
-          path: |
-            **/cdk.out
-          # key below has version of app changing in it
-          key: ${{ runner.os }}-${{ hashFiles('**/cdk-*/package.json') }}
+      # - uses: actions/cache@v3
+      #   id: cdk_deploy_cache
+      #   with:
+      #     path: |
+      #       **/cdk.out
+      #     # key below has version of app changing in it
+      #     key: ${{ runner.os }}-${{ hashFiles('**/cdk-*/package.json') }}
 
       - name: CDK Deploy
         run: |
@@ -169,7 +169,7 @@ jobs:
           yarn pipeline:deploy
 
       - name: Slack CDK Complete
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        # if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
