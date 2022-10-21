@@ -137,7 +137,7 @@ jobs:
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
       - name: Deployer Role
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
@@ -213,7 +213,7 @@ jobs:
           terraform_wrapper: true
 
       - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
@@ -334,7 +334,7 @@ jobs:
           echo "CDK_ENVIRONMENT_LONG_NAME=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
       - name: Deployer Role
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
