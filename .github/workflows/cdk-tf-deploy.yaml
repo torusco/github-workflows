@@ -160,7 +160,8 @@ jobs:
         with:
           path: |
             **/cdk.out
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          # key below has version of app changing in it
+          key: ${{ runner.os }}-${{ hashFiles('**/cdk-*/package.json') }}
 
       - name: CDK Deploy
         run: |
