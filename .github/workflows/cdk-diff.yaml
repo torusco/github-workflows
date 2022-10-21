@@ -64,7 +64,7 @@ jobs:
         id: yarn_lock_cache
         with:
           path: |
-            node_modules
+            **/node_modules
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: use github as yarn registry

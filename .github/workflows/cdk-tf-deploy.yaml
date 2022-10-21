@@ -104,7 +104,7 @@ jobs:
         id: yarn_lock_cache
         with:
           path: |
-            node_modules
+            **/node_modules
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: use github as yarn registry
@@ -159,7 +159,7 @@ jobs:
         id: cdk_deploy_cache
         with:
           path: |
-            node_modules
+            **/cdk.out
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
 
       - name: CDK Deploy
