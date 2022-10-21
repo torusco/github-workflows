@@ -155,6 +155,13 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
+      - uses: actions/cache@v3
+        id: cdk_deploy_cache
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
       - name: CDK Deploy
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
@@ -312,6 +319,7 @@ jobs:
           provider: awsProduction
 
       - name: yarn install && yarn build
+        if: steps.yarn_lock_cache.outputs.cache-hit != 'true'
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn install
