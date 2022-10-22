@@ -60,13 +60,6 @@ jobs:
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
 
-      - uses: actions/cache@v3
-        id: yarn_lock_cache
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-
       - name: use github as yarn registry
         uses: actions/setup-node@v3
         with:
@@ -76,7 +69,6 @@ jobs:
           scope: '@torusco'
 
       - name: yarn install && yarn build
-        if: steps.yarn_lock_cache.outputs.cache-hit != 'true'
         run: |
           yarn install
           yarn build
