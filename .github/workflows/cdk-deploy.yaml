@@ -91,13 +91,6 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
-      - uses: actions/cache@v3
-        id: yarn_lock_cache
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-
       - name: use github as yarn registry
         uses: actions/setup-node@v3
         with:
@@ -115,7 +108,6 @@ jobs:
           provider: awsProduction
 
       - name: yarn install && yarn build
-        if: steps.yarn_lock_cache.outputs.cache-hit != 'true'
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn install

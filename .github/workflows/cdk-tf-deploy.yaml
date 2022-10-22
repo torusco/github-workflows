@@ -100,13 +100,6 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
-      - uses: actions/cache@v3
-        id: yarn_lock_cache
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-
       - name: use github as yarn registry
         uses: actions/setup-node@v3
         with:
@@ -124,7 +117,6 @@ jobs:
           provider: awsProduction
 
       - name: yarn install && yarn build
-        if: steps.yarn_lock_cache.outputs.cache-hit != 'true'
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn install
@@ -155,21 +147,12 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      # - uses: actions/cache@v3
-      #   id: cdk_deploy_cache
-      #   with:
-      #     path: |
-      #       **/cdk.out
-      #     # key below has version of app changing in it
-      #     key: ${{ runner.os }}-${{ hashFiles('**/cdk-*/package.json') }}
-
       - name: CDK Deploy
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn pipeline:deploy
 
       - name: Slack CDK Complete
-        # if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.19.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
@@ -318,15 +301,6 @@ jobs:
           role: ${{ inputs.SAML_AWS_ROLE_ARN }}
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
-
-      - name: yarn install && yarn build
-        if: steps.yarn_lock_cache.outputs.cache-hit != 'true'
-        run: |
-          cd ${{ inputs.YARN_FOLDER_NAME }}
-          yarn install
-          yarn build
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: CDK_PREFIX CDK_ENVIRONMENT_LONG_NAME
         run: |
