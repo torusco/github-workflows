@@ -86,7 +86,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: use github as yarn registry
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v3 # Found that this action uses deprecated set-output command, filed bug with developers: https://github.com/actions/setup-node/issues/606
         with:
           node-version: '14.x'
           registry-url: 'https://npm.pkg.github.com/'
