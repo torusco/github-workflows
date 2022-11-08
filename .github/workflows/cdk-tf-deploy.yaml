@@ -155,7 +155,7 @@ jobs:
       - name: Integration Tests
         if: "${{inputs.RUN_INTEGRATION_TESTS != '' }}"
         run: |
-          yarn pipeline:int
+          yarn pipeline:test-int
 
       - name: Slack CDK Complete
         uses: slackapi/slack-github-action@v1.19.0
