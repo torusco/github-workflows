@@ -152,6 +152,11 @@ jobs:
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn pipeline:deploy
 
+      - name: Integration Tests
+        if: "${{inputs.RUN_INTEGRATION_TESTS != '' }}"
+        run: |
+          yarn pipeline:int
+
       - name: Slack CDK Complete
         uses: slackapi/slack-github-action@v1.19.0
         with:
@@ -182,7 +187,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: saml-to/assume-aws-role-action@v1
+      - uses: saml-to/assume-aws-role@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -274,44 +279,3 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-
-  integration_test:
-
-    needs: terraform_apply
-    runs-on: ubuntu-latest
-
-    steps:
-
-      - uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
-
-      - name: use github as yarn registry
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14.x'
-          registry-url: 'https://npm.pkg.github.com/'
-          always-auth: true
-          scope: '@torusco'
-          
-      - uses: saml-to/assume-aws-role-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
-          region: ${{ inputs.AWS_REGION }}
-          provider: awsProduction
-
-      - name: CDK_PREFIX CDK_ENVIRONMENT_LONG_NAME
-        run: |
-          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
-          echo "CDK_ENVIRONMENT_LONG_NAME=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
-
-      - name: Deployer Role
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-          aws-region: ${{ inputs.AWS_REGION }}
-          role-duration-seconds: 3600
-          
- 
