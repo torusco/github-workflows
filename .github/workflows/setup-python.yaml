@@ -1,0 +1,56 @@
+name: "Setup Python v4"
+
+on:
+  workflow_call:
+    inputs:
+      PYTHON_VERSION:
+        type: string
+        required: false
+        default: "3.10"
+
+      virtualenvs-create:
+        type: boolean
+        required: false
+        default: true
+
+      virtualenvs-in-project:
+        type: boolean
+        required: false
+        default: true
+
+      installer-parallel:
+        type: boolean
+        required: false
+        default: true
+
+jobs:
+  
+  setup-python:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # fetch all commits/branches
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        id: setup_py
+        with:
+          python-version: ${{ inputs.PYTHON_VERSION }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: ${{ inputs.virtualenvs-create }}
+          virtualenvs-in-project: ${{ inputs.virtualevns-in-project }}
+          installer-parallel: ${{ inputs.installer-parallel }}
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
