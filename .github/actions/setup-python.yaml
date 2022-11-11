@@ -1,7 +1,5 @@
 name: "Setup Python v4"
 
-on:
-  workflow_call:
     inputs:
       python_version:
         type: string
@@ -26,14 +24,11 @@ on:
         required: false
         default: true
 
-jobs:
-  
-  setup-python:
-
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
         with:
           fetch-depth: 0 # fetch all commits/branches
 
