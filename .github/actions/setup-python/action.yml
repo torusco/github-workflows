@@ -23,6 +23,14 @@ inputs:
     required: false
     default: true
 
+  ARTIFACTORY_USERNAME:
+    description: "Username to authenticate with artifactory"
+    required: true
+
+  ARTIFACTORY_TOKEN:
+    description: "Token to authenticate with artifactory"
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -47,7 +55,7 @@ runs:
 
     - name: Setup Poetry Creds
       run: |
-        poetry config http-basic.torusco ${{ secrets.ARTIFACTORY_USERNAME }} '${{ secrets.ARTIFACTORY_ACCESS_TOKEN }}'
+        poetry config http-basic.torusco ${{ inputs.ARTIFACTORY_USERNAME }} '${{ inputs.ARTIFACTORY_ACCESS_TOKEN }}'
 
     - name: Load cached venv
       id: cached-poetry-dependencies
