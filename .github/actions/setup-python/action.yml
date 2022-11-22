@@ -1,28 +1,27 @@
 name: "Setup Python v4"
+inputs:
+  python_version:
+    type: string
+    required: false
+    default: "3.10"
 
-    inputs:
-      python_version:
-        type: string
-        required: false
-        default: "3.10"
+  virtualenvs-create:
+    description: " Whether Poetry should create a virtualenv or not"
+    type: boolean
+    required: false
+    default: true
 
-      virtualenvs-create:
-        description: " Whether Poetry should create a virtualenv or not"
-        type: boolean
-        required: false
-        default: true
+  virtualenvs-in-project:
+    description: "Whether Poetry should create virtualenvs in the project directory or not"
+    type: boolean
+    required: false
+    default: true
 
-      virtualenvs-in-project:
-        description: "Whether Poetry should create virtualenvs in the project directory or not"
-        type: boolean
-        required: false
-        default: true
-
-      installer-parallel:
-        description: "Whether to install many packages at once or one by one.  This can fix PyPI DNS resolution errors, but also slows down the installation"
-        type: boolean
-        required: false
-        default: true
+  installer-parallel:
+    description: "Whether to install many packages at once or one by one.  This can fix PyPI DNS resolution errors, but also slows down the installation"
+    type: boolean
+    required: false
+    default: true
 
 runs:
   using: "composite"
@@ -52,4 +51,3 @@ runs:
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-        
