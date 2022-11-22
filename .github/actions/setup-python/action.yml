@@ -54,6 +54,7 @@ runs:
         installer-parallel: ${{ inputs.installer-parallel }}
 
     - name: Setup Poetry Creds
+      shell: bash
       run: |
         poetry config http-basic.torusco ${{ inputs.ARTIFACTORY_USERNAME }} '${{ inputs.ARTIFACTORY_ACCESS_TOKEN }}'
 
