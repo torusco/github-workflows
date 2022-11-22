@@ -42,7 +42,7 @@ runs:
       uses: snok/install-poetry@v1
       with:
         virtualenvs-create: ${{ inputs.virtualenvs-create }}
-        virtualenvs-in-project: ${{ inputs.virtualevns-in-project }}
+        virtualenvs-in-project: ${{ inputs.virtualenvs-in-project }}
         installer-parallel: ${{ inputs.installer-parallel }}
 
     - name: Load cached venv
