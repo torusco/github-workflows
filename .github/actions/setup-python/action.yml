@@ -27,7 +27,7 @@ inputs:
     description: "Username to authenticate with artifactory"
     required: true
 
-  ARTIFACTORY_TOKEN:
+  ARTIFACTORY_ACCESS_TOKEN:
     description: "Token to authenticate with artifactory"
     required: true
 
