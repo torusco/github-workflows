@@ -1,0 +1,105 @@
+name: "Terraform Plan for Pull Requests v4"
+
+on:
+  workflow_call:
+    inputs:
+      AWS_REGION:
+        type: string
+        required: true
+
+      CDK_PREFIX:
+        type: string
+        required: true
+
+      ENVIRONMENT_LONG_NAME:
+        type: string
+        required: true
+
+      SAML_AWS_ROLE_ARN:
+        type: string
+        required: true
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: true
+
+      TARGET_TERRAFORM_FOLDER_NAME:
+        type: string
+        required: true
+
+      USES_CLOUDFLARE:
+        type: boolean
+        required: false
+        default: false
+
+      USES_STRIPE:
+        type: boolean
+        required: false
+        default: false
+
+    secrets:
+      # only required if using cloudflare provider
+      CLOUDFLARE_API_TOKEN: 
+        required: false
+
+      # only required if using stripe provider
+      STRIPE_API_KEY:
+        required: false
+
+jobs:
+
+  terraform:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: saml-to/assume-aws-role-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
+          region: ${{ inputs.AWS_REGION }}
+          provider: awsProduction
+
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: true
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Environment Variables
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_TORUS_ENVIRONMENT=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
+
+      - name: CloudFlare Variables
+        if: "${{ inputs.USES_CLOUDFLARE != '' }}"
+        run: |
+          echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Stripe Variables
+        if: "${{ inputs.USES_STRIPE != '' }}"
+        run: |
+          echo "STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          terraform --version
+          terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure -upgrade
+          terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
+          terraform validate
+
+      # when not terraform apply, run the plan only with diff params
+      - name: Terraform Plan
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          terraform plan -var-file=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/.tfvars -input=false -lock=false -compact-warnings
