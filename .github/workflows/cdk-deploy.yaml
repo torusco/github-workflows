@@ -157,7 +157,7 @@ jobs:
           yarn pipeline:global:deploy
           
       - name: Integration Tests
-        if: "${{inputs.RUN_INTEGRATION_TESTS != '' }}"
+        if: "${{ inputs.RUN_INTEGRATION_TESTS == true }}"
         run: |
           yarn pipeline:test-int
 
