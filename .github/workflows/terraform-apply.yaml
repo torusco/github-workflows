@@ -1,8 +1,4 @@
-name: "Terraform Apply v4"
-
-# v4 - slack updates
-# v4 - filter by TARGET_TERRAFORM_FOLDER_NAME
-# v4 - Node.js 16 fix
+name: "Terraform Apply v5"
 
 on:
   workflow_call:

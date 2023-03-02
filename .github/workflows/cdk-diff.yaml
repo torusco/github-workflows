@@ -1,8 +1,4 @@
-name: "CDK Diff v4"
-
-# Release Notes v4
-#   switches to github package manager
-#   can also handle cdk global
+name: "CDK Diff v5"
 
 on:
   workflow_call:

@@ -1,7 +1,4 @@
-name: "Yarn Pull Request Tests v4"
-
-# Release Notes v4
-#   switches to github package manager
+name: "Yarn Pull Request Tests v5"
 
 on:
   workflow_call:
