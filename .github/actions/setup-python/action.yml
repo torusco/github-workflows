@@ -1,0 +1,67 @@
+name: "Setup Python v4"
+inputs:
+  python_version:
+    type: string
+    required: false
+    default: "3.10"
+
+  virtualenvs-create:
+    description: " Whether Poetry should create a virtualenv or not"
+    type: boolean
+    required: false
+    default: true
+
+  virtualenvs-in-project:
+    description: "Whether Poetry should create virtualenvs in the project directory or not"
+    type: boolean
+    required: false
+    default: true
+
+  installer-parallel:
+    description: "Whether to install many packages at once or one by one.  This can fix PyPI DNS resolution errors, but also slows down the installation"
+    type: boolean
+    required: false
+    default: true
+
+  ARTIFACTORY_USERNAME:
+    description: "Username to authenticate with artifactory"
+    required: true
+
+  ARTIFACTORY_ACCESS_TOKEN:
+    description: "Token to authenticate with artifactory"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # fetch all commits/branches
+        ref: ${{ github.head_ref }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      id: setup_py
+      with:
+        python-version: ${{ inputs.python_version }}
+        architecture: "x64"
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: ${{ inputs.virtualenvs-create }}
+        virtualenvs-in-project: ${{ inputs.virtualenvs-in-project }}
+        installer-parallel: ${{ inputs.installer-parallel }}
+
+    - name: Setup Poetry Creds
+      shell: bash
+      run: |
+        poetry config http-basic.torusco ${{ inputs.ARTIFACTORY_USERNAME }} '${{ inputs.ARTIFACTORY_ACCESS_TOKEN }}'
+
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
