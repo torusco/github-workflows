@@ -32,6 +32,11 @@ on:
         required: false
         default: false
 
+      USES_FIVETRAN:
+        type: boolean
+        required: false
+        default: false
+
       USES_STRIPE:
         type: boolean
         required: false
@@ -40,6 +45,14 @@ on:
     secrets:
       # only required if using cloudflare provider
       CLOUDFLARE_API_TOKEN: 
+        required: false
+
+      # only required if using fivetran provider
+      TF_VAR_FIVETRAN_API_KEY: 
+        required: false
+
+      # only required if using fivetran provider
+      TF_VAR_FIVETRAN_API_SECRET: 
         required: false
 
       # only required if using stripe provider
@@ -85,6 +98,12 @@ jobs:
         if: "${{ inputs.USES_CLOUDFLARE != '' }}"
         run: |
           echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Fivetran Variables
+        if: "${{ inputs.USES_FIVETRAN != '' }}"
+        run: |
+          echo "TF_VAR_FIVETRAN_API_KEY=${{ secrets.TF_VAR_FIVETRAN_API_KEY }}" >> $GITHUB_ENV
+          echo "TF_VAR_FIVETRAN_API_SECRET=${{ secrets.TF_VAR_FIVETRAN_API_SECRET }}" >> $GITHUB_ENV
 
       - name: Stripe Variables
         if: "${{ inputs.USES_STRIPE != '' }}"
