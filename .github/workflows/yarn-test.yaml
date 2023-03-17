@@ -28,6 +28,10 @@ on:
         type: boolean
         required: false
 
+      USES_DIFF:
+        type: boolean
+        required: false
+
       USES_SONAR_CLOUD:
         type: boolean
         default: true
@@ -142,5 +146,9 @@ jobs:
           export CDK_PREFIX=${{ inputs.INTEGRATION_TEST_ENVIRONENT}}
           yarn pipeline:test-int
 
+      - name: Yarn Diff
+        if: "${{ inputs.USES_DIFF != '' }}"
+        run: |
+          yarn diff
 
 
