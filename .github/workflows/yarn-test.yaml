@@ -1,4 +1,4 @@
-name: "Yarn Pull Request Tests v5"
+name: "Yarn Pull Request Tests v6"
 
 on:
   workflow_call:
@@ -60,7 +60,7 @@ jobs:
 
   cdk_test:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     steps:
 
       - name: Checkout USES_SONAR_CLOUD and USES_SONAR_CLOUD_MAIN_ANALYSIS

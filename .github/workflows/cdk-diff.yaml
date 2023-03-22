@@ -1,4 +1,4 @@
-name: "CDK Diff v5"
+name: "CDK Diff v6"
 
 on:
   workflow_call:
@@ -42,7 +42,7 @@ jobs:
 
   cdk-diff:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     steps:
       - uses: actions/checkout@v3
         with: 

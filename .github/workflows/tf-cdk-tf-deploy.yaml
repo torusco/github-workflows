@@ -1,4 +1,4 @@
-name: "TF CDK TF Deploy v5"
+name: "TF CDK TF Deploy v6"
 
 on:
   workflow_call:
@@ -80,7 +80,7 @@ on:
 jobs:
 
   environment_gate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     environment: ${{ inputs.CDK_PREFIX }}
     steps:
       - run: echo "environment gate"
@@ -88,7 +88,7 @@ jobs:
   terraform_apply_before:
 
     needs: environment_gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     steps:
       - uses: actions/checkout@v3
         with:
@@ -192,7 +192,7 @@ jobs:
   cdk_deploy:
 
     needs: terraform_apply_before
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     steps:
       - uses: actions/checkout@v3
         with:
@@ -277,7 +277,7 @@ jobs:
   terraform_apply_after:
 
     needs: cdk_deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     steps:
       - uses: actions/checkout@v3
         with:

@@ -2,5 +2,4 @@
 .idea
 .github/workflows/cdk-deploy copy.yaml
 .github/.DS_Store
-.github/workflows/.DS_Store
 .github/actions/.DS_Store
