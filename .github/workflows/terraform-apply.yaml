@@ -76,7 +76,7 @@ jobs:
 
   terraform:
 
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest-8-cores
     environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
       - uses: actions/checkout@v3

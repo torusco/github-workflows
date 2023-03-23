@@ -10,7 +10,7 @@ on:
 jobs:
 
   notify_jira:
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest-8-cores
     environment: ${{ inputs.MOBILE_STAGE }}
     steps:
       - run: echo "Reported to Jira in ${{ inputs.MOBILE_STAGE }} deployment"

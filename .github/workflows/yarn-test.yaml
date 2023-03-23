@@ -60,7 +60,7 @@ jobs:
 
   cdk_test:
 
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest-8-cores
     steps:
 
       - name: Checkout USES_SONAR_CLOUD and USES_SONAR_CLOUD_MAIN_ANALYSIS

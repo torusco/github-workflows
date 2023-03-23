@@ -42,7 +42,7 @@ jobs:
 
   cdk-diff:
 
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v3
         with: 

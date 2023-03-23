@@ -83,7 +83,7 @@ on:
 jobs:
 
   environment_gate:
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest-8-cores
     environment: ${{ inputs.CDK_PREFIX }}
     steps:
       - run: echo "environment gate"
@@ -91,7 +91,7 @@ jobs:
   cdk_deploy:
 
     needs: environment_gate
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v3
         with:
@@ -187,6 +187,6 @@ jobs:
 
   integration_test:
     needs: cdk_deploy
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest-8-cores
     steps:
       - run: echo "todo integration test here move to v4 when pipeline:test-int is implemented"
