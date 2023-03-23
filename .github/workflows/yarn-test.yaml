@@ -1,0 +1,154 @@
+name: "Yarn Pull Request Tests v5"
+
+on:
+  workflow_call:
+    inputs:
+    
+      AWS_REGION:
+        type: string
+        required: true
+
+      CDK_FOLDER_NAME:
+        type: string
+        required: true
+
+      INTEGRATION_TEST_ENVIRONENT:
+        type: string
+        required: false
+
+      SAML_AWS_ROLE_ARN:
+        type: string
+        required: true
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: false
+      
+      USES_INTEGRATION_TEST:
+        type: boolean
+        required: false
+
+      USES_DIFF:
+        type: boolean
+        required: false
+
+      USES_SONAR_CLOUD:
+        type: boolean
+        default: true
+        required: false
+
+      USES_SONAR_CLOUD_MAIN_ANALYSIS:
+        type: boolean
+        default: false
+        required: false
+        description: "override the branch from the event, and run on main, use with USES_SONAR_CLOUD for sonar cloud main analysis "
+
+      USES_CDK_NAG: 
+        type: boolean
+        default: false
+        required: false
+
+    secrets:
+      SONAR_TOKEN:
+        required: false
+
+      # required for using github package manager
+      NPM_TOKEN:
+        required: true
+
+jobs:
+
+  cdk_test:
+
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout USES_SONAR_CLOUD and USES_SONAR_CLOUD_MAIN_ANALYSIS
+        uses: actions/checkout@v3
+        if: "${{ inputs.USES_SONAR_CLOUD == true && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == true }}"
+        with: 
+          fetch-depth: 0     # sonar cloud - Number of commits to fetch. 0 indicates all history for all branches and tags.
+          ref: main  # we want to force the ref to main
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+
+      - name: Checkout USES_SONAR_CLOUD and not USES_SONAR_CLOUD_MAIN_ANALYSIS
+        uses: actions/checkout@v3
+        if: "${{ inputs.USES_SONAR_CLOUD == true && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == false }}"
+        with: 
+          fetch-depth: 0     # sonar cloud - Number of commits to fetch. 0 indicates all history for all branches and tags.
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+          # will take ref from the event (PR branch)
+
+      - name: Checkout not USES_SONAR_CLOUD
+        uses: actions/checkout@v3
+        if: "${{ inputs.USES_SONAR_CLOUD == false }}"
+        # clean regular checkout, no sonar cloud, no refs
+        with: 
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+
+      - name: use github as yarn registry
+        uses: actions/setup-node@v3 # Found that this action uses deprecated set-output command, filed bug with developers: https://github.com/actions/setup-node/issues/606
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com/'
+          always-auth: true
+          scope: '@torusco'
+
+      - uses: saml-to/assume-aws-role-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
+          region: ${{ inputs.AWS_REGION }}
+          provider: awsProduction
+
+      - name: yarn install && yarn build
+        run: |
+          yarn install
+          yarn build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Yarn Unit Test
+        run: |
+          yarn pipeline:test-unit
+
+      - name: SonarCloud Set Main
+        if: "${{ inputs.USES_SONAR_CLOUD == true && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == true }}"
+        run: |
+          echo -e "\nsonar.branch.name=main" >> sonar-project.properties
+          cat sonar-project.properties
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        if: "${{ inputs.USES_SONAR_CLOUD != '' }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: CDK Synth with CDK Nag
+        if: "${{ inputs.USES_CDK_NAG != '' }}"
+        run: |
+          export CDK_PREFIX=pullrequest
+          yarn synth
+
+      - name: Integration Test Role
+        if: "${{ inputs.USES_INTEGRATION_TEST != '' }}"
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Yarn Integration Test
+        if: "${{ inputs.USES_INTEGRATION_TEST != '' }}"
+        run: |
+          export CDK_PREFIX=${{ inputs.INTEGRATION_TEST_ENVIRONENT}}
+          yarn pipeline:test-int
+
+      - name: Yarn Diff
+        if: "${{ inputs.USES_DIFF != '' }}"
+        run: |
+          yarn diff
+
+

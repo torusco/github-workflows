@@ -1,4 +1,4 @@
-name: "Terraform Plan for Pull Requests v1"
+name: "Terraform Pull Requests v5"
 
 on:
   workflow_call:
@@ -27,15 +27,14 @@ on:
         type: string
         required: true
 
-      # true for deploy, false for PRs
-      TERRAFORM_APPLY:
-        type: boolean
-        required: true
-        default: false
-
       USES_CLOUDFLARE:
         type: boolean
-        required: true
+        required: false
+        default: false
+
+      USES_FIVETRAN:
+        type: boolean
+        required: false
         default: false
 
       USES_STRIPE:
@@ -48,7 +47,12 @@ on:
       CLOUDFLARE_API_TOKEN: 
         required: false
 
-      CLOUDFLARE_EMAIL:
+      # only required if using fivetran provider
+      TF_VAR_FIVETRAN_API_KEY: 
+        required: false
+
+      # only required if using fivetran provider
+      TF_VAR_FIVETRAN_API_SECRET: 
         required: false
 
       # only required if using stripe provider
@@ -61,9 +65,9 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: saml-to/assume-aws-role@v1
+      - uses: saml-to/assume-aws-role-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -75,9 +79,10 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: true
+          terraform_version: 1.3.9
 
       - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
@@ -93,7 +98,12 @@ jobs:
         if: "${{ inputs.USES_CLOUDFLARE != '' }}"
         run: |
           echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
-          echo "CLOUDFLARE_EMAIL=${{ secrets.CLOUDFLARE_EMAIL }}" >> $GITHUB_ENV
+
+      - name: Fivetran Variables
+        if: "${{ inputs.USES_FIVETRAN != '' }}"
+        run: |
+          echo "TF_VAR_FIVETRAN_API_KEY=${{ secrets.TF_VAR_FIVETRAN_API_KEY }}" >> $GITHUB_ENV
+          echo "TF_VAR_FIVETRAN_API_SECRET=${{ secrets.TF_VAR_FIVETRAN_API_SECRET }}" >> $GITHUB_ENV
 
       - name: Stripe Variables
         if: "${{ inputs.USES_STRIPE != '' }}"
@@ -104,7 +114,7 @@ jobs:
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform --version
-          terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure
+          terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure -upgrade
           terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
           terraform validate
 
@@ -112,4 +122,4 @@ jobs:
       - name: Terraform Plan
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          terraform plan -var-file=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/.tfvars -input=false -lock=false -compact-warnings -refresh-only
+          terraform plan -var-file=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/.tfvars -input=false -lock=false -compact-warnings

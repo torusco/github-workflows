@@ -1,0 +1,379 @@
+name: "TF CDK TF Deploy v5"
+
+on:
+  workflow_call:
+    inputs:
+      AWS_REGION:
+        type: string
+        required: true
+
+      CDK_FOLDER_NAME:
+        description: "use this folder with lerna monorepos that contain a cdk- folder, otherwise use YARN_FOLDER_NAME and set this to ."
+        type: string
+        required: true
+
+      CDK_PREFIX:
+        description: environment instance name is used to select the environment gate and to deploy CDK and Terraform code
+        type: string
+        required: true
+
+      ENVIRONMENT_LONG_NAME:
+        type: string
+        required: true
+
+      SAML_AWS_ROLE_ARN:
+        type: string
+        required: true
+
+      SLACK_CHANNEL_ID:
+        type: string
+        required: false
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: true
+
+      TARGET_TERRAFORM_FOLDER_NAME_BEFORE:
+        type: string
+        required: true
+        description: "which terraform project to run before cdk?"
+
+      TARGET_TERRAFORM_FOLDER_NAME_AFTER:
+        type: string
+        required: true
+        description: "which terraform project to run after cdk?"
+
+      YARN_FOLDER_NAME:
+        description: "use this folder repos that contain a series of cdk- folders but no parent and yarn needs to run within the cdk- folder not the root"
+        type: string
+        required: false
+        default: "."
+
+      # put uses flags at end
+      USES_CLOUDFLARE:
+        type: boolean
+        required: false
+        default: false
+
+      USES_STRIPE:
+        type: boolean
+        required: false
+        default: false
+
+    secrets:
+      # only required if using cloudflare provider
+      CLOUDFLARE_API_TOKEN: 
+        required: false
+
+      # only required if using stripe provider
+      STRIPE_API_KEY: 
+        required: false
+
+      # only required if using slack provider
+      SLACK_BOT_TOKEN:
+        required: false
+
+      # required for using github package manager
+      NPM_TOKEN:
+        required: true
+
+jobs:
+
+  environment_gate:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.CDK_PREFIX }}
+    steps:
+      - run: echo "environment gate"
+
+  terraform_apply_before:
+
+    needs: environment_gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+
+      - name: use github as yarn registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com/'
+          always-auth: true
+          scope: '@torusco'
+
+      - uses: saml-to/assume-aws-role-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
+          region: ${{ inputs.AWS_REGION }}
+          provider: awsProduction
+
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: true
+          terraform_version: 1.3.9
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Environment Variables
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_TORUS_ENVIRONMENT=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
+
+      - name: CloudFlare Variables
+        if: "${{ inputs.USES_CLOUDFLARE != '' }}"
+        run: |
+          echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Stripe Variables
+        if: "${{ inputs.USES_STRIPE != '' }}"
+        run: |
+          echo "STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME_BEFORE }}
+          terraform --version
+          terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure
+          terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
+
+      - name: Slack Terraform Start
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Plan Starting: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME_BEFORE }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Terraform Plan and Apply
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME_BEFORE }}
+          terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -input=false -compact-warnings -refresh-only
+          terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
+          terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
+
+      - name: Slack Terraform Complete
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Apply Complete: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME_BEFORE }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Slack Terraform Failure
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Apply Failed: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  cdk_deploy:
+
+    needs: terraform_apply_before
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+
+      - name: use github as yarn registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com/'
+          always-auth: true
+          scope: '@torusco'
+
+      - uses: saml-to/assume-aws-role-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
+          region: ${{ inputs.AWS_REGION }}
+          provider: awsProduction
+
+      - name: yarn install && yarn build
+        run: |
+          cd ${{ inputs.YARN_FOLDER_NAME }}
+          yarn install
+          yarn build
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: CDK_PREFIX
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+
+      - name: Deployer Role
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Slack CDK Start
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "CDK Deploy Starting: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: CDK Deploy
+        run: |
+          cd ${{ inputs.YARN_FOLDER_NAME }}
+          yarn pipeline:deploy
+
+      - name: Slack CDK Complete
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "CDK Deploy Complete: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      
+      - name: Slack Terraform Failure
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Apply Failed: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+  terraform_apply_after:
+
+    needs: cdk_deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+
+      - name: use github as yarn registry
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com/'
+          always-auth: true
+          scope: '@torusco'
+
+      - uses: saml-to/assume-aws-role-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
+          region: ${{ inputs.AWS_REGION }}
+          provider: awsProduction
+
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: true
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          aws-region: ${{ inputs.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Environment Variables
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_TORUS_ENVIRONMENT=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
+
+      - name: CloudFlare Variables
+        if: "${{ inputs.USES_CLOUDFLARE != '' }}"
+        run: |
+          echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Stripe Variables
+        if: "${{ inputs.USES_STRIPE != '' }}"
+        run: |
+          echo "STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME_AFTER }}
+          terraform --version
+          terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure
+          terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
+
+      - name: Slack Terraform Start
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Plan Starting: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME_AFTER }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Terraform Plan and Apply
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME_AFTER }}
+          terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -input=false -compact-warnings -refresh-only
+          terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
+          terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
+
+      - name: Slack Terraform Complete
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Apply Complete: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME_AFTER }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Slack Terraform Failure
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "Terraform Apply Failed: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
