@@ -40,6 +40,10 @@ on:
         type: string
         required: true
 
+      YARN_DEPLOY_COMMAND:
+        type: string
+        required: true
+
       YARN_FOLDER_NAME:
         description: "use this folder repos that contain a series of cdk- folders but no parent and yarn needs to run within the cdk- folder not the root"
         type: string
@@ -57,11 +61,6 @@ on:
         required: false
         default: false
 
-      USES_GLOBAL:
-        type: boolean
-        required: false
-        default: false
-        
       RUN_INTEGRATION_TESTS:
         type: boolean
         required: false
@@ -150,16 +149,9 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: CDK Deploy
-        if: "${{ inputs.USES_GLOBAL == false }}"
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
-          yarn pipeline:deploy
-
-      - name: CDK Deploy Global
-        if: "${{ inputs.USES_GLOBAL == true }}"
-        run: |
-          cd ${{ inputs.YARN_FOLDER_NAME }}
-          yarn pipeline:global:deploy
+          ${{ inputs.YARN_DEPLOY_COMMAND }}
           
       - name: Integration Tests
         if: "${{ inputs.RUN_INTEGRATION_TESTS == true }}"
@@ -194,4 +186,4 @@ jobs:
     needs: cdk_deploy
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
-      - run: echo "todo integration test here move to v4 when pipeline:test-int is implemented"
+      - run: echo "integration test here move to v4 when pipeline:test-int is implemented"
