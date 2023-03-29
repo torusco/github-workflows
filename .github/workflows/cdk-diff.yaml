@@ -28,10 +28,9 @@ on:
         type: string
         required: true
 
-      USES_GLOBAL:
-        type: boolean
-        required: false
-        default: false
+      YARN_DIFF_COMMAND:
+        type: string
+        required: true
 
     secrets:
       # required for using github package manager
@@ -40,7 +39,7 @@ on:
 
 jobs:
 
-  cdk-diff:
+  cdk_diff:
 
     runs-on: ubuntu-latest
     steps:
@@ -84,13 +83,7 @@ jobs:
           role-duration-seconds: 3600
 
       - name: CDK Diff
-        if: "${{ inputs.USES_GLOBAL == false }}"
         run: |
-          yarn pipeline:diff
-
-      - name: CDK Diff Global
-        if: "${{ inputs.USES_GLOBAL == true }}"
-        run: |
-          yarn pipeline:global:diff
+          ${{ inputs.YARN_DIFF_COMMAND }}
 
 
