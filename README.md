@@ -16,12 +16,14 @@ thank you!
 
 ## cdk-diff
 
-### v1
+### v5
+
+Stable, up to date.
 
 ```
   integration1:
     needs: [ globals ]
-    uses: torusco/github-workflows/.github/workflows/cdk-diff.yaml@v1
+    uses: torusco/github-workflows/.github/workflows/cdk-diff.yaml@v5
     with:
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_FOLDER_NAME: cdk-account
@@ -30,16 +32,42 @@ thank you!
       SAML_AWS_ROLE_ARN: ${{ needs.globals.outputs.SAML_AWS_ROLE_ARN }}
       TARGET_AWS_ACCOUNT_ROLE_ARN: "arn:aws:iam::${{ needs.globals.outputs.ACCOUNT_NUMBER }}:role/gha-app-deployer-1"
 ```
-## cdk-test
+## cdk-diff
 
-### v1
+### v6
+
+Github Large Runners Experiment
 
 ```
-  yarn-test:
-    needs: globals
-    uses: torusco/github-workflows/.github/workflows/cdk-test.yaml@v1
+  integration1:
+    needs: [ globals ]
+    uses: torusco/github-workflows/.github/workflows/cdk-diff.yaml@v5
     with:
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_FOLDER_NAME: cdk-account
+      CDK_PREFIX: ai1
+      ENVIRONMENT_LONG_NAME: "integration"
       SAML_AWS_ROLE_ARN: ${{ needs.globals.outputs.SAML_AWS_ROLE_ARN }}
+      TARGET_AWS_ACCOUNT_ROLE_ARN: "arn:aws:iam::${{ needs.globals.outputs.ACCOUNT_NUMBER }}:role/gha-app-deployer-1"
+```
+
+## cdk-diff
+
+### v7
+
+* Simpler monorepo support for multiple cdk / tf 
+* Pass yarn commands
+* Deploys on PR
+
+```
+  integration1:
+    needs: [ globals ]
+    uses: torusco/github-workflows/.github/workflows/cdk-diff.yaml@v5
+    with:
+      AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
+      CDK_FOLDER_NAME: cdk-account
+      CDK_PREFIX: ai1
+      ENVIRONMENT_LONG_NAME: "integration"
+      SAML_AWS_ROLE_ARN: ${{ needs.globals.outputs.SAML_AWS_ROLE_ARN }}
+      TARGET_AWS_ACCOUNT_ROLE_ARN: "arn:aws:iam::${{ needs.globals.outputs.ACCOUNT_NUMBER }}:role/gha-app-deployer-1"
 ```

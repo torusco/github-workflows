@@ -15,6 +15,11 @@ on:
         type: string
         required: true
 
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
@@ -63,7 +68,7 @@ jobs:
 
   terraform:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.RUNS_ON }}
     steps:
       - uses: actions/checkout@v3
 

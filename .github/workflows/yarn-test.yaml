@@ -16,6 +16,11 @@ on:
         type: string
         required: false
 
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
@@ -60,7 +65,7 @@ jobs:
 
   cdk_test:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.RUNS_ON }}
     steps:
 
       - name: Checkout USES_SONAR_CLOUD and USES_SONAR_CLOUD_MAIN_ANALYSIS

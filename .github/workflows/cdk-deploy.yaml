@@ -23,6 +23,11 @@ on:
         type: string
         required: true
 
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
@@ -83,7 +88,7 @@ on:
 jobs:
 
   environment_gate:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.RUNS_ON }}
     environment: ${{ inputs.CDK_PREFIX }}
     steps:
       - run: echo "environment gate"
@@ -91,7 +96,7 @@ jobs:
   cdk_deploy:
 
     needs: environment_gate
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.RUNS_ON }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -187,6 +192,6 @@ jobs:
 
   integration_test:
     needs: cdk_deploy
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.RUNS_ON }}
     steps:
       - run: echo "todo integration test here move to v4 when pipeline:test-int is implemented"

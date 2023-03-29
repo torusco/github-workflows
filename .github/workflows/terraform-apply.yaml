@@ -20,6 +20,11 @@ on:
         description: "Go to Settings > Environments for the repository and create an Environment that matches ENVIRONMENT_LONG_NAME with appropriate protection rules."
         required: true
 
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
       SAML_AWS_ROLE_ARN:
         type: string
         required: true
@@ -76,7 +81,7 @@ jobs:
 
   terraform:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.RUNS_ON }}
     environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
       - uses: actions/checkout@v3
