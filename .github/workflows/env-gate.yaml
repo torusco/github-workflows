@@ -9,6 +9,11 @@ on:
         type: string
         required: true
 
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
 jobs:
 
   environment_gate:
