@@ -69,6 +69,7 @@ Github Large Runners Experiment (hard-coded)
 env-gate example:
 ```
   testqa_env_gate:
+    needs: [ globals ]
     uses: torusco/github-workflows/.github/workflows/env-gate.yaml@v7
     with:
       CDK_PREFIX: "dt1"
