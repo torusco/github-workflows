@@ -8,10 +8,6 @@ on:
         type: string
         required: true
 
-      CDK_FOLDER_NAME:
-        type: string
-        required: true
-
       RUNS_ON:
         type: string
         required: false
