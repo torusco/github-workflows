@@ -25,7 +25,7 @@ on:
 
       RUNS_ON:
         type: string
-        required: false
+        required: true
         default: ubuntu-latest
 
       SAML_AWS_ROLE_ARN:
@@ -90,7 +90,7 @@ jobs:
     runs-on: ${{ inputs.RUNS_ON }}
     environment: ${{ inputs.CDK_PREFIX }}
     steps:
-      - run: echo "environment gate"
+      - run: echo "environment gate ${{ inputs.RUNS_ON }} ${{ inputs.CDK_PREFIX }}"
 
   cdk_deploy:
 
