@@ -1,0 +1,19 @@
+name: "Environment Gate Check v7"
+
+on:
+  workflow_call:
+    inputs:
+
+      CDK_PREFIX:
+        description: environment instance name is used to select the environment gate and to deploy CDK and Terraform code
+        type: string
+        required: true
+
+jobs:
+
+  environment_gate:
+    runs-on: ${{ inputs.RUNS_ON }}
+    environment: ${{ inputs.CDK_PREFIX }}
+    steps:
+      - run: echo "Environment Gate ${{ inputs.RUNS_ON }} ${{ inputs.CDK_PREFIX }}"
+

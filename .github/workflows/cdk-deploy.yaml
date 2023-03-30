@@ -80,15 +80,8 @@ on:
 
 jobs:
 
-  environment_gate:
-    runs-on: ${{ inputs.RUNS_ON }}
-    environment: ${{ inputs.CDK_PREFIX }}
-    steps:
-      - run: echo "environment gate ${{ inputs.RUNS_ON }} ${{ inputs.CDK_PREFIX }}"
-
   cdk_deploy:
 
-    needs: environment_gate
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
       - uses: actions/checkout@v3
