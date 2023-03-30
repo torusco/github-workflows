@@ -16,6 +16,10 @@ thank you!
 
 ## cdk-diff
 
+### v1-v4
+
+Deprecated.  Please upgrade.
+
 ### v5
 
 Stable, up to date.
@@ -36,7 +40,7 @@ Stable, up to date.
 
 ### v6
 
-Github Large Runners Experiment
+Github Large Runners Experiment (hard-coded)
 
 ```
   integration1:
@@ -60,6 +64,7 @@ Github Large Runners Experiment
 * Integration Tests have their own workflow because it doesn't always make sense to run them after the cdk deploy, sometimes, more deploys are needed first - use yarn-test
 * Filter by cdk path as well as tf path - only run when changes are present
 * Environment gate is a separate workflow so it is only inserted once
+* Runs on (runner type) is passed via input (update to v6)
 
 env-gate example:
 ```
