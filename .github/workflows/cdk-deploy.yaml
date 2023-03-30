@@ -61,12 +61,6 @@ on:
         required: false
         default: false
 
-      RUN_INTEGRATION_TESTS:
-        type: boolean
-        required: false
-        default: false
-        description: "should integration tests be run on this environment?  typically false for preprod/production and true everywhere else"
-
     secrets:
       # only required if using cloudflare provider
       CLOUDFLARE_API_TOKEN: 
@@ -100,6 +94,19 @@ jobs:
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+
+      - name: Filter By CDK_FOLDER_NAME
+        uses: dorny/paths-filter@v2.11.1
+        with:
+          filters: |
+            cdk-folder:
+              - ${{ inputs.CDK_FOLDER_NAME }}/**
+              - services/
+
+      - if: steps.changes.outputs.cdk-folder == 'false'
+        run: |
+          echo "Cancel workflow because relevant files did not change"
+          exit 0
 
       - name: use github as yarn registry
         uses: actions/setup-node@v3
@@ -153,11 +160,6 @@ jobs:
           cd ${{ inputs.YARN_FOLDER_NAME }}
           ${{ inputs.YARN_DEPLOY_COMMAND }}
           
-      - name: Integration Tests
-        if: "${{ inputs.RUN_INTEGRATION_TESTS == true }}"
-        run: |
-          yarn pipeline:test-int
-
       - name: Slack CDK Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.23.0
@@ -181,9 +183,3 @@ jobs:
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
-  integration_test:
-    needs: cdk_deploy
-    runs-on: ${{ inputs.RUNS_ON }}
-    steps:
-      - run: echo "integration test here move to v4 when pipeline:test-int is implemented"

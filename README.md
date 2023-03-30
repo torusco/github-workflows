@@ -56,8 +56,8 @@ Github Large Runners Experiment
 ### v7
 
 * Simpler monorepo support for multiple cdk / tf 
-* Pass yarn commands
-* Deploys on PR
+* Pass yarn commands for a BC rather than assuming homogenous repos with same setups
+* Integration Tests have their own workflow because it doesn't always make sense to run them after the cdk deploy, sometimes, more deploys are needed first
 
 ```
   integration1:
