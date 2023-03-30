@@ -61,15 +61,28 @@ Github Large Runners Experiment
 * Filter by cdk path as well as tf path - only run when changes are present
 * Environment gate is a separate workflow so it is only inserted once
 
+env-gate example:
 ```
-  integration1:
+  testqa_env_gate:
+    uses: torusco/github-workflows/.github/workflows/env-gate.yaml@v7
+    with:
+      CDK_PREFIX: "dt1"
+      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON }}
+
+```
+
+yarn-test unit example:
+```
+  yarn_test_cdks:
+
     needs: [ globals ]
-    uses: torusco/github-workflows/.github/workflows/cdk-diff.yaml@v5
+    uses: torusco/github-workflows/.github/workflows/yarn-test.yaml@v7
     with:
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
-      CDK_FOLDER_NAME: cdk-account
-      CDK_PREFIX: ai1
-      ENVIRONMENT_LONG_NAME: "integration"
+      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON }}
       SAML_AWS_ROLE_ARN: ${{ needs.globals.outputs.SAML_AWS_ROLE_ARN }}
-      TARGET_AWS_ACCOUNT_ROLE_ARN: "arn:aws:iam::${{ needs.globals.outputs.ACCOUNT_NUMBER }}:role/gha-app-deployer-1"
+      YARN_TEST_COMMAND: "yarn pipeline:test"
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
