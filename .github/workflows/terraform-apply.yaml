@@ -146,8 +146,7 @@ jobs:
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform --version
           terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure
-          terraform workspace select $CDK_PREFIX || terraform workspace new -state="./.terraform/terraform.tfstate" $CDK_PREFIX
-          terraform validate
+          terraform workspace select -or-create $CDK_PREFIX 
 
       - name: Slack Terraform Start
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
@@ -164,7 +163,6 @@ jobs:
       - name: Terraform Plan and Apply
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -input=false -compact-warnings -refresh-only
           terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
 
