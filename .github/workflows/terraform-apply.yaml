@@ -41,6 +41,11 @@ on:
         type: string
         required: true
 
+      TERRAFORM_RESOURCE_TO_REPLACE:
+        type: string
+        required: false
+        description: "fully qualified resource name to force replace, if needed, after normal terraform run"
+
       USES_CLOUDFLARE:
         type: boolean
         required: false
@@ -165,6 +170,13 @@ jobs:
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
+
+      - name: Terraform Resource Plan and Apply
+        if: "${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE != '' }}"
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          terraform plan -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
+          terraform apply -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
 
       - name: Slack Terraform Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
