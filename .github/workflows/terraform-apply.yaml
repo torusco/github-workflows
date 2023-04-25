@@ -15,11 +15,6 @@ on:
         type: string
         required: true
 
-      GITHUB_ENVIRONMENT_GATE:
-        type: string
-        description: "Go to Settings > Environments for the repository and create an Environment that matches ENVIRONMENT_LONG_NAME with appropriate protection rules."
-        required: true
-
       RUNS_ON:
         type: string
         required: false
@@ -87,7 +82,6 @@ jobs:
   terraform:
 
     runs-on: ${{ inputs.RUNS_ON }}
-    environment: ${{ inputs.GITHUB_ENVIRONMENT_GATE }}
     steps:
       - uses: actions/checkout@v3
 
