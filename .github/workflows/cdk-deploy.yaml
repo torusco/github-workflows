@@ -100,7 +100,7 @@ jobs:
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo github.ref $GITHUB_REF $GITHUB_REF_NAME
-          echo github.event ${{ inputs.GITHUB_EVENT }}
+          echo github.event ${{ fromJSON(inputs.GITHUB_EVENT)[github.event] }}
 
 
       - name: Filter By CDK_FOLDER_NAME
