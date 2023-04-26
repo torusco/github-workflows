@@ -150,6 +150,7 @@ jobs:
           echo "STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}" >> $GITHUB_ENV
 
       - name: Slack Terraform Start
+        id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.23.0
         with:
@@ -186,6 +187,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.23.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
               "text" : ":check-passed: :terraform: Terraform Apply Complete: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ github.ref }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
@@ -198,6 +200,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.23.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
               "text" : ":check-failed: :terraform: Terraform Apply Failed: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ github.ref }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "

@@ -145,6 +145,7 @@ jobs:
           role-duration-seconds: 3600
 
       - name: Slack CDK Start
+        id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.23.0
         with:
@@ -166,6 +167,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.23.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
               "text" : ":check-passed: :cdk: CDK Deploy Complete: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ github.ref }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
@@ -178,6 +180,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.23.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
               "text" : ":check-failed: :cdk: CDK Deploy Failed: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ github.ref }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
