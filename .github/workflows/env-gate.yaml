@@ -20,5 +20,11 @@ jobs:
     runs-on: ${{ inputs.RUNS_ON }}
     environment: ${{ inputs.CDK_PREFIX }}
     steps:
+      - name: echo
+        run: |
+          echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
+          echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+
       - run: echo "Environment Gate ${{ inputs.RUNS_ON }} ${{ inputs.CDK_PREFIX }}"
 

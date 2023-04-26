@@ -89,7 +89,6 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: echo
-
         run: |
           echo CDK_FOLDER_NAME ${{ inputs.CDK_FOLDER_NAME }}
           echo SAML_AWS_ROLE_ARN ${{ inputs.SAML_AWS_ROLE_ARN }}
@@ -137,7 +136,6 @@ jobs:
       - name: CDK_PREFIX
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
-          echo ${{ env.GITHUB_RUN_URL_FOR_SLACK }} 
 
       - name: Deployer Role
         uses: aws-actions/configure-aws-credentials@v1-node16
@@ -153,7 +151,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":large_green_circle: :cdk: CDK Deploy Starting: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ github.ref }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+              "text" : ":large_green_circle: :cdk: CDK Deploy Starting: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ github.ref }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -170,7 +168,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":check-passed: :cdk: CDK Deploy Complete: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+              "text" : ":check-passed: :cdk: CDK Deploy Complete: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ github.ref }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -182,7 +180,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":check-failed: :cdk: CDK Deploy Failed: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+              "text" : ":check-failed: :cdk: CDK Deploy Failed: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ github.ref }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
