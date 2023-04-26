@@ -147,7 +147,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":large_green_circle: :terraform: Terraform Plan Starting: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
+              "text" : ":large_green_circle: :terraform: Terraform Plan Starting: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -179,7 +179,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":check-passed: :terraform: Terraform Apply Complete: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
+              "text" : ":check-passed: :terraform: Terraform Apply Complete: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -191,7 +191,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":check-failed: :terraform: Terraform Apply Failed: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+              "text" : ":check-failed: :terraform: Terraform Apply Failed: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
