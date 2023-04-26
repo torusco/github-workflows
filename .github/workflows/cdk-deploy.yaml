@@ -94,6 +94,8 @@ jobs:
           echo SAML_AWS_ROLE_ARN ${{ inputs.SAML_AWS_ROLE_ARN }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo github.event.payload.ref ${{ github.event.payload.ref }}
+          echo github.event.payload.pull_request ${{ github.event.payload.pull_request }}
 
       - name: Filter By CDK_FOLDER_NAME
         uses: dorny/paths-filter@v2.11.1
