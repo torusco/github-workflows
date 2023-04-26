@@ -24,9 +24,9 @@ on:
         required: true
 
       GITHUB_EVENT:
-        type: string
+        type: object
         required: false
-        description: "send github.event"
+        description: "send github.event when workflow_dispatch is trigger"
 
       RUNS_ON:
         type: string
