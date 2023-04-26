@@ -26,7 +26,7 @@ on:
       GITHUB_EVENT:
         type: string
         required: false
-        description: "send ${{ github.event }}"
+        description: "send github.event"
 
       RUNS_ON:
         type: string
