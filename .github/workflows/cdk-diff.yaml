@@ -52,14 +52,6 @@ jobs:
         with: 
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
-      - name: echo
-        run: |
-          echo CDK_FOLDER_NAME ${{ inputs.CDK_FOLDER_NAME }}
-          echo SAML_AWS_ROLE_ARN ${{ inputs.SAML_AWS_ROLE_ARN }}
-          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-          echo AWS_REGION ${{ inputs.AWS_REGION }}
-          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
-
       - uses: saml-to/assume-aws-role-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

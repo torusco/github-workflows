@@ -51,14 +51,6 @@ jobs:
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
 
-      - name: echo
-        run: |
-          echo CDK_FOLDER_NAME ${{ inputs.CDK_FOLDER_NAME }}
-          echo SAML_AWS_ROLE_ARN ${{ inputs.SAML_AWS_ROLE_ARN }}
-          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-          echo AWS_REGION ${{ inputs.AWS_REGION }}
-          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
-
       - name: Checkout USES_SONAR_CLOUD and USES_SONAR_CLOUD_MAIN_ANALYSIS
         uses: actions/checkout@v3
         if: "${{ inputs.USES_SONAR_CLOUD == true && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == true }}"
