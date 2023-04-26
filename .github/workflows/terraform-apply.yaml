@@ -85,6 +85,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: echo
+        run: |
+          echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          echo SAML_AWS_ROLE_ARN ${{ inputs.SAML_AWS_ROLE_ARN }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+
       - name: Filter By TARGET_TERRAFORM_FOLDER_NAME
         uses: dorny/paths-filter@v2.11.1
         with:
@@ -147,7 +155,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":large_green_circle: :terraform: Terraform Plan Starting: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
+              "text" : ":large_green_circle: :terraform: Terraform Plan Starting: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ github.ref }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -179,7 +187,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":check-passed: :terraform: Terraform Apply Complete: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }}"
+              "text" : ":check-passed: :terraform: Terraform Apply Complete: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ github.ref }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -191,7 +199,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":check-failed: :terraform: Terraform Apply Failed: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }}"
+              "text" : ":check-failed: :terraform: Terraform Apply Failed: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ github.ref }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
