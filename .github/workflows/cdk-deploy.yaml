@@ -155,7 +155,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":large_green_circle: :cdk: CDK Deploy Starting: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{env.GITHUB_REF}} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{GITHUB_SERVER_URL}}/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+              "text" : ":large_green_circle: :cdk: CDK Deploy Starting: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{env.GITHUB_REF}} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{env.GITHUB_SERVER_URL}}/${{env.GITHUB_REPOSITORY}}/actions/runs/${{env.GITHUB_RUN_ID}}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
