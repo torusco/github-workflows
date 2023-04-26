@@ -92,6 +92,7 @@ jobs:
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }}" >> $GITHUB_ENV
 
       - name: Filter By TARGET_TERRAFORM_FOLDER_NAME
         uses: dorny/paths-filter@v2.11.1
