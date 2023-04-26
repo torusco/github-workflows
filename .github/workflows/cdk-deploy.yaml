@@ -26,7 +26,7 @@ on:
       GITHUB_EVENT:
         type: string
         required: false
-        description: send  ${{ github.event }}
+        description: "send ${{ github.event }}"
 
       RUNS_ON:
         type: string
@@ -100,7 +100,6 @@ jobs:
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo github.event ${{ github.event }}
-          # run: echo "${{ github.event.inputs.message }} ${{ fromJSON('["", "🥳"]')[github.event.inputs.use-emoji == 'true'] }} ${{ github.event.inputs.name }}"
 
 
       - name: Filter By CDK_FOLDER_NAME
