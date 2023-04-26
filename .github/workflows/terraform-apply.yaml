@@ -83,7 +83,27 @@ jobs:
 
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
-      - uses: actions/checkout@v3
+      - if: github.event.client_payload.ref != ''
+        name: actions/checkout@v3 client payload ref
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.client_payload.ref }}
+
+      - if: github.event.client_payload.ref != ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use ${{ github.event.client_payload.ref }} not ${{ github.ref }}"
+          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref == ''
+        name: actions/checkout@v3 default ref
+        uses: actions/checkout@v3
+
+      - if: github.event.client_payload.ref == ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use default ${{ github.ref }}"
+          echo "GITHUB_CHECKOUT_REF=${{ github.ref }}" >> $GITHUB_ENV
 
       - name: echo
         run: |
@@ -157,7 +177,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":large_yellow_circle: :terraform: Terraforming! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ github.ref }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
+              "text" : ":large_yellow_circle: :terraform: Terraforming! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ env.GITHUB_CHECKOUT_REF }} to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -190,7 +210,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-passed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ github.ref }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
+              "text" : ":check-passed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ env.GITHUB_CHECKOUT_REF }} applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -203,7 +223,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-failed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ github.ref }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
+              "text" : ":check-failed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} ${{ env.GITHUB_CHECKOUT_REF }} applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_RUN_URL_FOR_SLACK }} "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
