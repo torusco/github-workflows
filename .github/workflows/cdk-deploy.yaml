@@ -24,7 +24,7 @@ on:
         required: true
 
       GITHUB_EVENT:
-        type: object
+        type: string
         required: false
         description: "send github.event when workflow_dispatch is trigger"
 
@@ -100,6 +100,7 @@ jobs:
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo github.event ${{ github.event }}
+          echo github.event ${{ fromJSON(github.event) }}
 
 
       - name: Filter By CDK_FOLDER_NAME
