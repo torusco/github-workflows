@@ -101,6 +101,7 @@ jobs:
         run: |
           ${{ inputs.YARN_TEST_COMMAND }}
 
+      # instead of hacking it here, add this to the sonar-project.properties!
       - name: SonarCloud Set Main
         if: "${{ inputs.USES_SONAR_CLOUD == true && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == true }}"
         run: |
