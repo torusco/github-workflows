@@ -25,6 +25,7 @@ jobs:
         run: | 
           echo "Environment Gate ${{ inputs.RUNS_ON }} ${{ inputs.CDK_PREFIX }}"
           if [ -z  "${{ inputs.CDK_PREFIX }}"]; then
+            echo "Missing CDK_PREFIX!  Please check your yaml! :)"
             exit 1
           fi
 
