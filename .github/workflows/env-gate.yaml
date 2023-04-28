@@ -21,5 +21,10 @@ jobs:
     environment: ${{ inputs.CDK_PREFIX }}
     steps:
 
-      - run: echo "Environment Gate ${{ inputs.RUNS_ON }} ${{ inputs.CDK_PREFIX }}"
+      - name: echo
+        run: | 
+          echo "Environment Gate ${{ inputs.RUNS_ON }} ${{ inputs.CDK_PREFIX }}"
+          if [ -z  "${{ inputs.CDK_PREFIX }}"]; then
+            exit 1
+          fi
 
