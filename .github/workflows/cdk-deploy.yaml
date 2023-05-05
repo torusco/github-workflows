@@ -97,7 +97,8 @@ jobs:
         name: GITHUB_CHECKOUT_REF
         run: |
           echo "use ${{ github.event.client_payload.ref }} not ${{ github.ref }}"
-          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref }}" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref != ''
         name: actions/checkout@v3 client payload ref
@@ -110,7 +111,8 @@ jobs:
         name: GITHUB_CHECKOUT_REF
         run: |
           echo "use default ${{ github.ref }}"
-          echo "GITHUB_CHECKOUT_REF=${{ github.ref }}" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref == ''
         name: actions/checkout@v3 default ref
@@ -174,7 +176,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":large_yellow_circle: :cdk: Deploying! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ env.GITHUB_CHECKOUT_REF }} to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":large_yellow_circle: :cdk: Deploying! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -192,7 +194,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-passed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ env.GITHUB_CHECKOUT_REF }} deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-passed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }}<${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -205,7 +207,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-failed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ env.GITHUB_CHECKOUT_REF }} not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-failed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }}<${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -218,7 +220,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":black_square_on_stop: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} ${{ env.GITHUB_CHECKOUT_REF }} cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":black_square_on_stop: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }}<${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
