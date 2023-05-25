@@ -134,11 +134,10 @@ jobs:
           files: ${{ inputs.CHANGED_FILE_FOLDERS }}
       
       - if: inputs.CHANGED_FILE_FOLDERS != ''
-        name: List changed files
+        name: Cancel because no changed files
         run: |
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "$file was changed"
-          done
+          echo "Cancel workflow because relevant files did not change"
+          exit 0
 
       - name: use github as yarn registry
         uses: actions/setup-node@v3
