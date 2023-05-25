@@ -97,7 +97,6 @@ jobs:
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
-          echo "SKIP_DEPLOY=false" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref != ''
         name: GITHUB_CHECKOUT_REF
@@ -137,12 +136,10 @@ jobs:
       - if: inputs.CHANGED_FILE_FOLDERS != ''
         name: Cancel because no changed files
         run: |
-          # WHY???? https://github.com/actions/runner/issues/662
-          echo "Skip deployment steps because relevant files did not change"
-          echo "SKIP_DEPLOY=true" >> $GITHUB_ENV
+          echo "Cancel workflow because relevant files did not change"
+          exit 0
 
-      - if: env.SKIP_DEPLOY == 'true'
-        name: use github as yarn registry
+      - name: use github as yarn registry
         uses: actions/setup-node@v3
         with:
           node-version: '16.x'
@@ -150,8 +147,7 @@ jobs:
           always-auth: true
           scope: '@torusco'
           
-      - if: env.SKIP_DEPLOY == 'true'
-        uses: saml-to/assume-aws-role-action@v1
+      - uses: saml-to/assume-aws-role-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -159,8 +155,7 @@ jobs:
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
 
-      - if: env.SKIP_DEPLOY == 'true'
-        name: yarn install && yarn build
+      - name: yarn install && yarn build
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           yarn install
@@ -168,13 +163,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: env.SKIP_DEPLOY == 'true'
-        name: CDK_PREFIX
+      - name: CDK_PREFIX
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
-      - if: env.SKIP_DEPLOY == 'true'
-        name: Deployer Role
+      - name: Deployer Role
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
