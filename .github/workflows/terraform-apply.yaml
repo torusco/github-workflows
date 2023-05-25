@@ -11,6 +11,11 @@ on:
         type: string
         required: true
 
+      CHANGED_FILE_FOLDERS:
+        description: folder name or list of folder names to check for changed files, used to skip run, Example cdk-airflow
+        type: string
+        required: false
+
       ENVIRONMENT_LONG_NAME:
         type: string
         required: true
@@ -116,19 +121,16 @@ jobs:
         name: actions/checkout@v3 default ref
         uses: actions/checkout@v3
 
-      - name: Filter By TARGET_TERRAFORM_FOLDER_NAME
-        uses: dorny/paths-filter@v2.11.1
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
+        name: Get changed files
+        id: changed_files 
+        uses: tj-actions/changed-files@v35
         with:
-          filters: |
-            tf-folder:
-              - ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}/**
-
-      - if: steps.changes.outputs.tf-folder == 'false'
-        run: |
-          echo "Cancel workflow because relevant files did not change"
-          exit 0
-
-      - uses: saml-to/assume-aws-role-action@v1
+          files: ${{ inputs.CHANGED_FILE_FOLDERS }}
+          # WHY???? https://github.com/actions/runner/issues/662
+      
+      - if: steps.changed_files.outputs.all_changed_files != ''
+        uses: saml-to/assume-aws-role-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -136,20 +138,23 @@ jobs:
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
 
-      - name: Terraform Setup
+      - if: steps.changed_files.outputs.all_changed_files != ''
+        name: Terraform Setup
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: true
           terraform_version: 1.4.4
 
-      - name: Configure AWS
+      - if: steps.changed_files.outputs.all_changed_files != ''
+        name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
           role-duration-seconds: 3600
 
-      - name: Environment Variables
+      - if: steps.changed_files.outputs.all_changed_files != ''
+        name: Environment Variables
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
           echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
@@ -184,21 +189,23 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: Terraform Init
+      - if: steps.changed_files.outputs.all_changed_files != ''
+        name: Terraform Init
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform --version
           terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure
           terraform workspace select -or-create $CDK_PREFIX 
 
-      - name: Terraform Plan and Apply
+      - if: steps.changed_files.outputs.all_changed_files != ''
+        name: Terraform Plan and Apply
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform plan -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
 
-      - name: Terraform Resource Plan and Apply
-        if: "${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE != '' }}"
+      - if: steps.changed_files.outputs.all_changed_files != '' && inputs.TERRAFORM_RESOURCE_TO_REPLACE != ''
+        name: Terraform Resource Plan and Apply
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform plan -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} -var-file=./${{ inputs.ENVIRONMENT_LONG_NAME }}/.tfvars -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
