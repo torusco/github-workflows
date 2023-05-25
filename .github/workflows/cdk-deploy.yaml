@@ -128,18 +128,18 @@ jobs:
 
       - if: inputs.CHANGED_FILE_FOLDERS != ''
         name: Get changed files
-        id: changed_files 
+        id: changed-files 
         uses: tj-actions/changed-files@v35
         with:
           files: ${{ inputs.CHANGED_FILE_FOLDERS }}
       
-      - if: steps.changed_files.outputs.all_changed_files != ''
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
         name: Check if should deploy based on changed files
         run: |
           # WHY???? https://github.com/actions/runner/issues/662
           echo "Skip deployment steps because relevant files did not change"
 
-      - if: steps.changed_files.outputs.all_changed_files != ''
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
         name: use github as yarn registry
         uses: actions/setup-node@v3
         with:
@@ -148,7 +148,7 @@ jobs:
           always-auth: true
           scope: '@torusco'
           
-      - if: steps.changed_files.outputs.all_changed_files != ''
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
         uses: saml-to/assume-aws-role-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -157,7 +157,7 @@ jobs:
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
 
-      - if: steps.changed_files.outputs.all_changed_files != ''
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
         name: yarn install && yarn build
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
@@ -166,12 +166,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: steps.changed_files.outputs.all_changed_files != ''
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
         name: CDK_PREFIX
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
-      - if: steps.changed_files.outputs.all_changed_files != ''
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
         name: Deployer Role
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
@@ -192,7 +192,7 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - if: steps.changed_files.outputs.all_changed_files != ''
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
         name: CDK Deploy
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
