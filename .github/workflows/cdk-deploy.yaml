@@ -132,8 +132,13 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: ${{ inputs.CHANGED_FILE_FOLDERS }}
-          # WHY???? https://github.com/actions/runner/issues/662
       
+      - if: steps.changed_files.outputs.all_changed_files != ''
+        name: Check if should deploy based on changed files
+        run: |
+          # WHY???? https://github.com/actions/runner/issues/662
+          echo "Skip deployment steps because relevant files did not change"
+
       - if: steps.changed_files.outputs.all_changed_files != ''
         name: use github as yarn registry
         uses: actions/setup-node@v3
