@@ -22,7 +22,7 @@ on:
       CHANGED_FILE_FOLDERS:
         description: folder name or list of folder names to check for changed files, used to skip run, Example cdk-airflow
         type: string
-        required: false
+        required: true
 
       ENVIRONMENT_LONG_NAME:
         type: string
@@ -126,8 +126,7 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
-      - if: inputs.CHANGED_FILE_FOLDERS != ''
-        name: Get changed files
+      - name: Get changed files
         id: changed_files 
         uses: tj-actions/changed-files@v35
         with:
