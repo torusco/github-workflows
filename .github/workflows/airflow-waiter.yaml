@@ -86,27 +86,6 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
-      - name: Filter By AIRFLOW_ENVIRONMENT_NAME
-        uses: dorny/paths-filter@v2.11.1
-        with:
-          filters: |
-            cdk-folder:
-              - ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }}/**
-              - services/
-
-      - if: steps.changes.outputs.cdk-folder == 'false'
-        run: |
-          echo "Cancel workflow because relevant files did not change"
-          exit 0
-
-      - name: use github as yarn registry
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16.x'
-          registry-url: 'https://npm.pkg.github.com/'
-          always-auth: true
-          scope: '@torusco'
-          
       - uses: saml-to/assume-aws-role-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -114,18 +93,6 @@ jobs:
           role: ${{ inputs.SAML_AWS_ROLE_ARN }}
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
-
-      - name: yarn install && yarn build
-        run: |
-          cd ${{ inputs.YARN_FOLDER_NAME }}
-          yarn install
-          yarn build
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: CDK_PREFIX
-        run: |
-          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
       - name: Deployer Role
         uses: aws-actions/configure-aws-credentials@v1-node16
@@ -142,15 +109,25 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":large_yellow_circle: :cdk: Deploying! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":large_yellow_circle: :airflow: Waiting! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: CDK Deploy
+      - name: Waiter Check Airflow is Ready
         run: |
-          cd ${{ inputs.YARN_FOLDER_NAME }}
-          ${{ inputs.YARN_DEPLOY_COMMAND }}
+          STATUS=$(aws mwaa get-environment --name ${{ needs.globals.outputs.AIRFLOW_ENVIRONMENT_NAME}} --query 'Environment.Status' --out text)
+
+          WAITED=0
+          WAIT_TIME=5
+
+          while [[ $STATUS == "UPDATING" ]]
+          do
+            STATUS=$(aws mwaa get-environment --name ${{ needs.globals.outputs.AIRFLOW_ENVIRONMENT_NAME}} --query 'Environment.Status' --out text)
+            echo "Waiting for Airflow ${{ needs.globals.outputs.AIRFLOW_ENVIRONMENT_NAME}} to finish UPDATING for $WAITED seconds"
+            WAITED=$((WAITED + WAIT_TIME))
+            sleep $WAIT_TIME
+          done
           
       - name: Slack CDK Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
@@ -160,7 +137,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-passed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-passed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -173,7 +150,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-failed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-failed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -186,7 +163,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":black_square_for_stop: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":black_square_for_stop: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
