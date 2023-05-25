@@ -44,6 +44,9 @@ on:
       SLACK_BOT_TOKEN:
         required: false
 
+      # required for using github refs
+      NPM_TOKEN:
+        required: true
 jobs:
 
   cdk_deploy:
