@@ -19,6 +19,11 @@ on:
         type: string
         required: true
 
+      CHANGED_FILE_FOLDERS:
+        description: folder name or list of folder names to check for changed files, used to skip run, Example cdk-airflow
+        type: string
+        required: false
+
       ENVIRONMENT_LONG_NAME:
         type: string
         required: true
@@ -106,6 +111,7 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
           ref: ${{ github.event.client_payload.ref }}
+          fetch-depth: 0  # changed-files requires ... OR "2" -> To retrieve the preceding commit.
 
       - if: github.event.client_payload.ref == ''
         name: GITHUB_CHECKOUT_REF
@@ -120,18 +126,19 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
-      - name: Filter By CDK_FOLDER_NAME
-        uses: dorny/paths-filter@v2.11.1
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
+        name: Get changed files
+        id: changed-files 
+        uses: tj-actions/changed-files@v35
         with:
-          filters: |
-            cdk-folder:
-              - ${{ inputs.CDK_FOLDER_NAME }}/**
-              - services/
-
-      - if: steps.changes.outputs.cdk-folder == 'false'
+          files: ${{ inputs.CHANGED_FILE_FOLDERS }}
+      
+      - if: inputs.CHANGED_FILE_FOLDERS != ''
+        name: List changed files
         run: |
-          echo "Cancel workflow because relevant files did not change"
-          exit 0
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+          done
 
       - name: use github as yarn registry
         uses: actions/setup-node@v3
