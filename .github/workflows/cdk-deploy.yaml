@@ -97,6 +97,7 @@ jobs:
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "SKIP_DEPLOY=false" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref != ''
         name: GITHUB_CHECKOUT_REF
@@ -134,12 +135,13 @@ jobs:
           files: ${{ inputs.CHANGED_FILE_FOLDERS }}
       
       - if: inputs.CHANGED_FILE_FOLDERS != ''
-        name: Check if should deploy based on changed files
+        name: Cancel because no changed files
         run: |
           # WHY???? https://github.com/actions/runner/issues/662
           echo "Skip deployment steps because relevant files did not change"
+          echo "SKIP_DEPLOY=true" >> $GITHUB_ENV
 
-      - if: inputs.CHANGED_FILE_FOLDERS != ''
+      - if: env.SKIP_DEPLOY == 'true'
         name: use github as yarn registry
         uses: actions/setup-node@v3
         with:
@@ -148,7 +150,7 @@ jobs:
           always-auth: true
           scope: '@torusco'
           
-      - if: inputs.CHANGED_FILE_FOLDERS != ''
+      - if: env.SKIP_DEPLOY == 'true'
         uses: saml-to/assume-aws-role-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -157,7 +159,7 @@ jobs:
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
 
-      - if: inputs.CHANGED_FILE_FOLDERS != ''
+      - if: env.SKIP_DEPLOY == 'true'
         name: yarn install && yarn build
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
@@ -166,12 +168,12 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - if: inputs.CHANGED_FILE_FOLDERS != ''
+      - if: env.SKIP_DEPLOY == 'true'
         name: CDK_PREFIX
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
-      - if: inputs.CHANGED_FILE_FOLDERS != ''
+      - if: env.SKIP_DEPLOY == 'true'
         name: Deployer Role
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
@@ -192,8 +194,7 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - if: inputs.CHANGED_FILE_FOLDERS != ''
-        name: CDK Deploy
+      - name: CDK Deploy
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           ${{ inputs.YARN_DEPLOY_COMMAND }}
