@@ -127,6 +127,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
+          cache: 'npm'      
           
       - uses: saml-to/assume-aws-role-action@v1
         env:
