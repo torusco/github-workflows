@@ -4,10 +4,6 @@ on:
   workflow_call:
     inputs:
     
-      # AWS_REGION:
-      #   type: string
-      #   required: true
-
       CDK_PREFIX:
         type: string
         required: true
@@ -20,14 +16,6 @@ on:
         type: string
         required: false
         default: ubuntu-latest
-
-      # SAML_AWS_ROLE_ARN:
-      #   type: string
-      #   required: true
-
-      # TARGET_AWS_ACCOUNT_ROLE_ARN:
-      #   type: string
-      #   required: false
 
       TARGET_TERRAFORM_FOLDER_NAME:
         type: string
@@ -51,9 +39,6 @@ jobs:
       - name: echo
         run: |
           echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          # echo SAML_AWS_ROLE_ARN ${{ inputs.SAML_AWS_ROLE_ARN }}
-          # echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-          # echo AWS_REGION ${{ inputs.AWS_REGION }}
 
       - if: github.event.client_payload.ref != ''
         name: GITHUB_CHECKOUT_REF
@@ -77,14 +62,6 @@ jobs:
         name: actions/checkout@v3 default ref
         uses: actions/checkout@v3
 
-      # - uses: saml-to/assume-aws-role-action@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     role: ${{ inputs.SAML_AWS_ROLE_ARN }}
-      #     region: ${{ inputs.AWS_REGION }}
-      #     provider: awsProduction
-
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v4
         with:
@@ -100,13 +77,6 @@ jobs:
         with:
           terraform_wrapper: true
           terraform_version: ${{ env.TERRAFORM_VERSION }}
-
-      # - name: Configure AWS
-      #   uses: aws-actions/configure-aws-credentials@v1-node16
-      #   with:
-      #     role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-      #     aws-region: ${{ inputs.AWS_REGION }}
-      #     role-duration-seconds: 3600
 
       - name: Environment Variables
         run: |
