@@ -57,7 +57,7 @@ Github Large Runners Experiment (hard-coded)
 
 ## cdk-diff
 
-### v7
+### v7.x
 
 * Simpler monorepo support for multiple cdk / tf 
 * Pass yarn commands for a BC rather than assuming homogenous repos with same setups
@@ -91,4 +91,19 @@ yarn-test unit example:
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+terraform-checkov example:
+```
+    terraform_checkov_datadog:
+        needs: [globals]
+        uses: torusco/github-workflows/.github/workflows/terraform-checkov.yaml@v7.1
+        with:
+            TARGET_TERRAFORM_FOLDER_NAME: tf-datadog
+            CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
+            ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
+            RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
+        secrets:
+            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
 ```
