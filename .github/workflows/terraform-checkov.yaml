@@ -3,15 +3,14 @@ name: "Terraform Pull Request Checkov Tests v7.1"
 on:
   workflow_call:
     inputs:
-    
       CDK_PREFIX:
         type: string
         required: true
-  
+
       ENVIRONMENT_LONG_NAME:
         type: string
         required: true
-  
+
       RUNS_ON:
         type: string
         required: false
@@ -20,7 +19,7 @@ on:
       TARGET_TERRAFORM_FOLDER_NAME:
         type: string
         required: true
-        
+
     secrets:
       # required for using github package manager
       NPM_TOKEN:
@@ -31,9 +30,7 @@ env:
   TERRAFORM_VERSION: "1.5.1"
 
 jobs:
-
   terraform_checkov:
-
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
       - name: echo
@@ -66,12 +63,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-  
+
       - name: Install checkov
         run: |
           python -c "import sys; print(sys.version)"
           pip install checkov
-  
+
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v2
         with:
