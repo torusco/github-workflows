@@ -46,6 +46,11 @@ on:
         required: false
         default: false
 
+      USES_DATADOG:
+        type: boolean
+        required: false
+        default: false
+
       USES_FIVETRAN:
         type: boolean
         required: false
@@ -59,6 +64,14 @@ on:
     secrets:
       # only required if using cloudflare provider
       CLOUDFLARE_API_TOKEN: 
+        required: false
+
+      # only required if using datadog provider
+      DD_API_KEY: 
+        required: false
+
+      # only required if using datadog provider
+      DD_APP_KEY: 
         required: false
 
       # only required if using fivetran provider
@@ -116,18 +129,6 @@ jobs:
         name: actions/checkout@v3 default ref
         uses: actions/checkout@v3
 
-      - name: Filter By TARGET_TERRAFORM_FOLDER_NAME
-        uses: dorny/paths-filter@v2.11.1
-        with:
-          filters: |
-            tf-folder:
-              - ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}/**
-
-      - if: steps.changes.outputs.tf-folder == 'false'
-        run: |
-          echo "Cancel workflow because relevant files did not change"
-          exit 0
-
       - uses: saml-to/assume-aws-role-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -160,6 +161,12 @@ jobs:
         run: |
           echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
 
+      - name: Datadog Variables
+        if: "${{ inputs.USES_DATADOG != '' }}"
+        run: |
+          echo "DD_API_KEY=${{ secrets.DD_API_KEY }}" >> $GITHUB_ENV
+          echo "DD_APP_KEY=${{ secrets.DD_APP_KEY }}" >> $GITHUB_ENV
+  
       - name: Fivetran Variables
         if: "${{ inputs.USES_FIVETRAN != '' }}"
         run: |
