@@ -44,7 +44,7 @@ on:
       TERRAFORM_VAR_FILE:
         type: string
         required: true
-        description: "most var files are just -var-file=./${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}/.tfvars but some use instance specific variables such as -var-file=./${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}/${{ needs.globals.outputs.CDK_PREFIX }}.tfvars"
+        description: "most var files are just -var-file=./<env long name>/.tfvars but some use instance specific variables such as -var-file=./<env long name>/<cdk prefix>.tfvars"
 
       USES_CLOUDFLARE:
         type: boolean
