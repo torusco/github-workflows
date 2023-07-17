@@ -236,6 +236,7 @@ jobs:
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           ls -al
+          cat tables.json
           cat get-ddb-tables.log
 
       - name: Slack Terraform Complete
