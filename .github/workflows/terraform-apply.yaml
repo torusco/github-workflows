@@ -228,10 +228,15 @@ jobs:
         if: "${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE != '' }}"
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          ls -al
           terraform plan -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} -var-file=${{ inputs.TERRAFORM_VAR_FILE }} -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
-          ls -al
           terraform apply -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
+
+      - if: failure() 
+        name: logs
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          ls -al
+          cat get-ddb-tables.log
 
       - name: Slack Terraform Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
