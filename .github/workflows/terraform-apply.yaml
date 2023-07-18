@@ -231,14 +231,6 @@ jobs:
           terraform plan -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} -var-file=${{ inputs.TERRAFORM_VAR_FILE }} -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
           terraform apply -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
 
-      - if: failure() 
-        name: logs
-        run: |
-          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          ls -al
-          cat tables.json
-          cat get-ddb-tables.log
-
       - name: Slack Terraform Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.23.0
