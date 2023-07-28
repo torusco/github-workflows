@@ -53,11 +53,11 @@ on:
         required: false
 
       # only required if using fivetran provider
-      TF_VAR_FIVETRAN_API_KEY: 
+      FIVETRAN_APIKEY: 
         required: false
 
       # only required if using fivetran provider
-      TF_VAR_FIVETRAN_API_SECRET: 
+      FIVETRAN_APISECRET: 
         required: false
 
       # only required if using stripe provider
@@ -107,8 +107,8 @@ jobs:
       - name: Fivetran Variables
         if: "${{ inputs.USES_FIVETRAN != '' }}"
         run: |
-          echo "TF_VAR_FIVETRAN_API_KEY=${{ secrets.TF_VAR_FIVETRAN_API_KEY }}" >> $GITHUB_ENV
-          echo "TF_VAR_FIVETRAN_API_SECRET=${{ secrets.TF_VAR_FIVETRAN_API_SECRET }}" >> $GITHUB_ENV
+          echo "FIVETRAN_APIKEY=${{ secrets.FIVETRAN_APIKEY }}" >> $GITHUB_ENV
+          echo "FIVETRAN_APISECRET=${{ secrets.FIVETRAN_APISECRET }}" >> $GITHUB_ENV
 
       - name: Stripe Variables
         if: "${{ inputs.USES_STRIPE != '' }}"
