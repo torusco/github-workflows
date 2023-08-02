@@ -66,6 +66,11 @@ on:
         required: false
         default: false
 
+      USES_OKTA:
+        type: boolean
+        required: false
+        default: false
+
       USES_STRIPE:
         type: boolean
         required: false
@@ -90,6 +95,10 @@ on:
 
       # only required if using fivetran provider
       FIVETRAN_APISECRET: 
+        required: false
+
+      # only required if using okta provider
+      OKTA_API_TOKEN: 
         required: false
 
       # only required if using stripe provider
@@ -192,6 +201,11 @@ jobs:
         run: |
           echo "FIVETRAN_APIKEY=${{ secrets.FIVETRAN_APIKEY }}" >> $GITHUB_ENV
           echo "FIVETRAN_APISECRET=${{ secrets.FIVETRAN_APISECRET }}" >> $GITHUB_ENV
+
+      - name: Okta Variables
+        if: "${{ inputs.USES_OKTA != '' }}"
+        run: |
+          echo "OKTA_API_TOKEN=${{ secrets.OKTA_API_TOKEN }}" >> $GITHUB_ENV
 
       - name: Stripe Variables
         if: "${{ inputs.USES_STRIPE != '' }}"
