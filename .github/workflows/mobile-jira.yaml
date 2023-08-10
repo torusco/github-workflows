@@ -1,4 +1,4 @@
-name: "Mobile Jira v6"
+name: "Mobile Jira v6.x"
 
 on:
   workflow_call:

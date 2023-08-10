@@ -1,4 +1,4 @@
-name: "Yarn Pull Request Tests v6"
+name: "Yarn Pull Request Tests v6.x"
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: "Terraform Apply v6"
+name: "Terraform Apply v6.x"
 
 on:
   workflow_call:

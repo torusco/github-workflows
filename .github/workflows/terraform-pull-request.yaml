@@ -1,4 +1,4 @@
-name: "Terraform Pull Requests v6"
+name: "Terraform Pull Requests v6.x"
 
 on:
   workflow_call:
