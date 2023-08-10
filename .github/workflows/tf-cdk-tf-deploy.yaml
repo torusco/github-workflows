@@ -1,4 +1,4 @@
-name: "TF CDK TF Deploy v5"
+name: "TF CDK TF Deploy v5.x"
 
 on:
   workflow_call:

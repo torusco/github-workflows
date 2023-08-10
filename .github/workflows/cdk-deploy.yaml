@@ -1,4 +1,4 @@
-name: "CDK Deploy v5"
+name: "CDK Deploy v5.x"
 
 # uses NPM_TOKEN to use github package manager
 
