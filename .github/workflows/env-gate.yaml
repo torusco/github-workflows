@@ -52,8 +52,13 @@ jobs:
     runs-on: ${{ inputs.RUNS_ON }}
     environment: ${{ inputs.CDK_PREFIX }}
     steps:
+      - name: make github urls
+        run: |
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
 
-      - name: echo
+      - name: Check CDK_PREFIX
         run: | 
           echo "Environment Gate ${{ inputs.RUNS_ON }} ${{ inputs.CDK_PREFIX }}"
           if [ -z  "${{ inputs.CDK_PREFIX }}"]; then
@@ -61,18 +66,14 @@ jobs:
             exit 1
           fi
 
-  request_approval_in_slack:
-    needs: [ pre_check_gate, environment_gate ]
-    runs-on: ${{ inputs.RUNS_ON }}
-    steps:
-      - name: Slack Message
+      - name: Approved
         uses: slackapi/slack-github-action@v1.23.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ job.pre_check_gate.outputs.slack }}
           payload: |
             {
-              "text" : ":check-passed: Environment Gate Auto Approved! :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-passed: Environment Gate Approved! :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}          
