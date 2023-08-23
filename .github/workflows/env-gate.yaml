@@ -78,3 +78,18 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
           TS: ${{ needs.pre_check_gate.outputs.ts }}        
+
+      - name: Cancelled
+        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ env.TS}}
+          payload: |
+            {
+              "text" : ":black_square_for_stop: :gate: ${{ inputs.CDK_PREFIX }} :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Cancelled! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
+          TS: ${{ needs.pre_check_gate.outputs.ts }}        
+  
