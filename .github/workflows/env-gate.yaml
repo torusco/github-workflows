@@ -100,6 +100,10 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
           TS: ${{ needs.pre_check_gate.outputs.ts }}        
 
+  cancel_check:
+    needs: [ pre_check_gate, environment_gate ]
+    runs-on: ${{ inputs.RUNS_ON }}
+    steps:
       - name: Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.23.0
