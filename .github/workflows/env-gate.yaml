@@ -26,6 +26,8 @@ jobs:
 
   pre_check_gate:
     runs-on: ${{ inputs.RUNS_ON }}
+    outputs:
+      slack: ${{ steps.slack.outputs.ts }}
     steps:
       - name: Slack Message
         id: slack
@@ -54,17 +56,17 @@ jobs:
           fi
 
   request_approval_in_slack:
-    needs: [ environment_gate ]
+    needs: [ pre_check_gate, environment_gate ]
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
       - name: Slack Message
-        id: slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ job.pre_check_gate.outputs.slack }}
           payload: |
             {
-              "text" : ":eyes: Auto approval :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : "..."
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}          
