@@ -29,12 +29,23 @@ jobs:
     outputs:
       ts: ${{ steps.slack.outputs.ts }}
     steps:
-      - name: make github urls
+
+      - if: github.event.client_payload.ref != ''
+        name: GITHUB_CHECKOUT_REF
         run: |
+          echo "use ${{ github.event.client_payload.ref }} not ${{ github.ref }}"
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref == ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use default ${{ github.ref }}"
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
           echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
-    
+
       - name: Slack Message
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
@@ -52,8 +63,18 @@ jobs:
     runs-on: ${{ inputs.RUNS_ON }}
     environment: ${{ inputs.CDK_PREFIX }}
     steps:
-      - name: make github urls
+      - if: github.event.client_payload.ref != ''
+        name: GITHUB_CHECKOUT_REF
         run: |
+          echo "use ${{ github.event.client_payload.ref }} not ${{ github.ref }}"
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref == ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use default ${{ github.ref }}"
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
           echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
