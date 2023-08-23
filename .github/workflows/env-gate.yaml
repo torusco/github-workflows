@@ -1,4 +1,4 @@
-name: "Environment Gate Check v7"
+name: "Environment Gate Check v7.3"
 
 on:
   workflow_call:
@@ -13,6 +13,14 @@ on:
         type: string
         required: false
         default: ubuntu-latest
+
+      SLACK_CHANNEL_ID:
+        type: string
+        required: true
+  
+    secrets:
+      SLACK_BOT_TOKEN:
+        required: true
 
 jobs:
 
