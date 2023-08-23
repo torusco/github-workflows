@@ -42,7 +42,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":eyes: :gate: Environment Gate Approval Requested :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":eyes: :gate: ${{ inputs.CDK_PREFIX }} Approval :question: :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> :click-here: <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}       
@@ -73,7 +73,7 @@ jobs:
           update-ts: ${{ env.TS}}
           payload: |
             {
-              "text" : ":check-passed: :gate: Environment Gate Approved! :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-passed: :gate: ${{ inputs.CDK_PREFIX }} Approved! :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
