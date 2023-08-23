@@ -37,6 +37,10 @@ jobs:
             exit 1
           fi
 
+  request_approval_in_slack:
+    if: "${{ always() }}"
+    runs-on: ${{ inputs.RUNS_ON }}
+    steps:
       - name: Slack Message
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
