@@ -53,7 +53,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":eyes: :gate: ${{ inputs.CDK_PREFIX }} :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Checking for Approval... <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> :click-here: <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":eyes: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} Checking for Approval... <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> :click-here: <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}       
@@ -94,7 +94,7 @@ jobs:
           update-ts: ${{ env.TS}}
           payload: |
             {
-              "text" : ":check-passed: :gate: ${{ inputs.CDK_PREFIX }} :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Approved! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-passed: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} Approved! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
@@ -108,7 +108,7 @@ jobs:
           update-ts: ${{ env.TS}}
           payload: |
             {
-              "text" : ":black_square_for_stop: :gate: ${{ inputs.CDK_PREFIX }} :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Cancelled! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":black_square_for_stop: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} Cancelled! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
