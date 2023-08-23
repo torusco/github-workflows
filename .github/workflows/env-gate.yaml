@@ -29,6 +29,12 @@ jobs:
     outputs:
       slack: ${{ steps.slack.outputs.ts }}
     steps:
+      - name: make github urls
+        run: |
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
+    
       - name: Slack Message
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
