@@ -28,10 +28,6 @@ jobs:
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
 
-      - name: echo
-        run: |
-          echo "SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }}" >> $GITHUB_ENV
-
       - name: Slack Message
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
@@ -39,7 +35,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ${{ inputs.MESAGE }}
+              "text" : ${{ inputs.MESSAGE }}
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
