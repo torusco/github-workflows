@@ -42,7 +42,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":eyes: Checking Environment Gate :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":eyes: Environment Gate Approval Requested :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}       
@@ -72,7 +72,7 @@ jobs:
           update-ts: ${{ job.pre_check_gate.outputs.slack }}
           payload: |
             {
-              "text" : "..."
+              "text" : ":check-passed: Environment Gate Auto Approved! :${{ github.event.repository.name }}: ${{ github.event.repository.name }}  <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}          
