@@ -7,11 +7,6 @@ on:
         type: string
         required: true
 
-      PY_FOLDER_NAME:
-        description: "use this folder py- folder that contains the script, requirements.txt, and other files"
-        type: string
-        required: true
-
       CDK_PREFIX:
         description: environment instance name is used to select the environment gate and to deploy code
         type: string
@@ -21,6 +16,16 @@ on:
         type: string
         required: true
 
+      PY_FOLDER_NAME:
+        description: "use this folder py- folder that contains the script, requirements.txt, and other files"
+        type: string
+        required: true
+
+      PY_VERSION:
+        description: "the python version to install, ex 3.10 or 3.11"
+        type: string
+        required: true
+  
       RUNS_ON:
         type: string
         required: true
