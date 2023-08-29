@@ -84,10 +84,6 @@ on:
       SLACK_BOT_TOKEN:
         required: false
 
-      # required for using github package manager
-      NPM_TOKEN:
-        required: true
-
 jobs:
 
   python_run:
