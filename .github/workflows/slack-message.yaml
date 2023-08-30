@@ -15,6 +15,7 @@ on:
         required: true
 
       MESSAGE:
+        description: message that goes in the json
         type: string
         required: true
 
