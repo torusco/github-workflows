@@ -173,7 +173,7 @@ jobs:
           terraform_version: 1.4.4
 
       - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
