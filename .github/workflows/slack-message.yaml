@@ -35,7 +35,7 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ${{ inputs.MESSAGE }}
+              "text" : "${{ inputs.MESSAGE }}"
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
