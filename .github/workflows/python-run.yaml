@@ -161,9 +161,10 @@ jobs:
           cd ${{ inputs.PY_FOLDER_NAME }}
           pip install -r requirements.txt
 
-      - name: CDK_PREFIX
+      - name: ENV VARS
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "ENVIRONMENT_LONG_NAME=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
       - name: Deployer Role
         uses: aws-actions/configure-aws-credentials@v3
