@@ -58,6 +58,11 @@ on:
         required: false
         default: false
   
+      USES_METABASE:
+        type: boolean
+        required: false
+        default: false
+    
       USES_STRIPE:
         type: boolean
         required: false
@@ -68,12 +73,20 @@ on:
       CLOUDFLARE_API_TOKEN: 
         required: false
 
-        # only required if using fivetran provider
+      # only required if using fivetran provider
       FIVETRAN_APIKEY: 
         required: false
 
       # only required if using fivetran provider
       FIVETRAN_APISECRET: 
+        required: false
+
+      # only required if using metabase provider
+      METABASE_USER: 
+        required: false
+
+      # only required if using metabase provider
+      METABASE_PASS: 
         required: false
 
       # only required if using stripe provider
@@ -170,6 +183,12 @@ jobs:
           echo "FIVETRAN_APIKEY=${{ secrets.FIVETRAN_APIKEY }}" >> $GITHUB_ENV
           echo "FIVETRAN_APISECRET=${{ secrets.FIVETRAN_APISECRET }}" >> $GITHUB_ENV
   
+      - name: Metabase Variables
+        if: "${{ inputs.USES_METABASE != '' }}"
+        run: |
+          echo "METABASE_USER=${{ secrets.METABASE_USER }}" >> $GITHUB_ENV
+          echo "METABASE_PASS=${{ secrets.METABASE_PASS }}" >> $GITHUB_ENV
+
       - name: Stripe Variables
         if: "${{ inputs.USES_STRIPE != '' }}"
         run: |
