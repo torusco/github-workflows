@@ -172,6 +172,10 @@ jobs:
             cd ${{ inputs.PY_FOLDER_NAME }}
             pip install -r requirements.txt
 
+      - name: install poetry
+        if: "${{ inputs.USES_POETRY != '' }}"
+        uses: snok/install-poetry@v1
+    
       - name: poetry install
         if: "${{ inputs.USES_POETRY != '' }}"
         run: |
