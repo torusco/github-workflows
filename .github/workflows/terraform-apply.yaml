@@ -109,6 +109,9 @@ on:
       SLACK_BOT_TOKEN:
         required: false
 
+env:
+  TERRAFORM_VERSION: "1.6.3"
+
 jobs:
 
   terraform:
@@ -170,7 +173,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: true
-          terraform_version: 1.4.4
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v3
