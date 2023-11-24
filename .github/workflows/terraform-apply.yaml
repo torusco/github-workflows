@@ -110,7 +110,7 @@ on:
         required: false
 
 env:
-  TERRAFORM_VERSION: "1.6.3"
+  TERRAFORM_VERSION: "1.6.4"
 
 jobs:
 

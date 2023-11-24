@@ -27,7 +27,7 @@ on:
 
 env:
   PYTHON_VERSION: "3.10"
-  TERRAFORM_VERSION: "1.6.3"
+  TERRAFORM_VERSION: "1.6.4"
 
 jobs:
   terraform_checkov:
