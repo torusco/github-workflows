@@ -77,7 +77,7 @@ jobs:
       - name: use github as yarn registry
         uses: actions/setup-node@v3 # Found that this action uses deprecated set-output command, filed bug with developers: https://github.com/actions/setup-node/issues/606
         with:
-          node-version: '16.x'
+          node-version: '20'
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
