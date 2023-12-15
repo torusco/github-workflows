@@ -1,4 +1,4 @@
-name: "Yarn Pull Request Tests v5"
+name: "Yarn Pull Request Unit Tests v7"
 
 on:
   workflow_call:
@@ -8,13 +8,10 @@ on:
         type: string
         required: true
 
-      CDK_FOLDER_NAME:
-        type: string
-        required: true
-
-      INTEGRATION_TEST_ENVIRONENT:
+      RUNS_ON:
         type: string
         required: false
+        default: ubuntu-latest
 
       SAML_AWS_ROLE_ARN:
         type: string
@@ -23,15 +20,11 @@ on:
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: false
+
+      YARN_TEST_COMMAND:
+        type: string
+        required: true
       
-      USES_INTEGRATION_TEST:
-        type: boolean
-        required: false
-
-      USES_DIFF:
-        type: boolean
-        required: false
-
       USES_SONAR_CLOUD:
         type: boolean
         default: true
@@ -42,11 +35,6 @@ on:
         default: false
         required: false
         description: "override the branch from the event, and run on main, use with USES_SONAR_CLOUD for sonar cloud main analysis "
-
-      USES_CDK_NAG: 
-        type: boolean
-        default: false
-        required: false
 
     secrets:
       SONAR_TOKEN:
@@ -60,7 +48,7 @@ jobs:
 
   cdk_test:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.RUNS_ON }}
     steps:
 
       - name: Checkout USES_SONAR_CLOUD and USES_SONAR_CLOUD_MAIN_ANALYSIS
@@ -89,10 +77,11 @@ jobs:
       - name: use github as yarn registry
         uses: actions/setup-node@v3 # Found that this action uses deprecated set-output command, filed bug with developers: https://github.com/actions/setup-node/issues/606
         with:
-          node-version: '14.x'
+          node-version: '20'
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
+          cache: 'yarn'      
 
       - uses: saml-to/assume-aws-role-action@v1
         env:
@@ -109,10 +98,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Yarn Unit Test
+      - name: ${{ inputs.YARN_TEST_COMMAND }}
         run: |
-          yarn pipeline:test-unit
+          ${{ inputs.YARN_TEST_COMMAND }}
 
+      # instead of hacking it here, add this to the sonar-project.properties!
       - name: SonarCloud Set Main
         if: "${{ inputs.USES_SONAR_CLOUD == true && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == true }}"
         run: |
@@ -126,29 +116,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: CDK Synth with CDK Nag
-        if: "${{ inputs.USES_CDK_NAG != '' }}"
-        run: |
-          export CDK_PREFIX=pullrequest
-          yarn synth
-
-      - name: Integration Test Role
-        if: "${{ inputs.USES_INTEGRATION_TEST != '' }}"
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-          aws-region: ${{ inputs.AWS_REGION }}
-          role-duration-seconds: 3600
-
-      - name: Yarn Integration Test
-        if: "${{ inputs.USES_INTEGRATION_TEST != '' }}"
-        run: |
-          export CDK_PREFIX=${{ inputs.INTEGRATION_TEST_ENVIRONENT}}
-          yarn pipeline:test-int
-
-      - name: Yarn Diff
-        if: "${{ inputs.USES_DIFF != '' }}"
-        run: |
-          yarn diff
 
 

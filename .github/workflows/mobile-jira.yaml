@@ -1,16 +1,22 @@
-name: "Mobile Jira v5"
+name: "Mobile Jira v7"
 
 on:
   workflow_call:
     inputs:
+
       MOBILE_STAGE:
         type: string
         required: true
 
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
 jobs:
 
   notify_jira:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.RUNS_ON }}
     environment: ${{ inputs.MOBILE_STAGE }}
     steps:
       - run: echo "Reported to Jira in ${{ inputs.MOBILE_STAGE }} deployment"

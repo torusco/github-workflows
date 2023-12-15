@@ -1,0 +1,42 @@
+name: "Slack Message v7"
+# sends a slack message to a channel, not smart (not updating), so don't be verbose
+
+on:
+  workflow_call:
+    inputs:
+
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
+      SLACK_CHANNEL_ID:
+        type: string
+        required: true
+
+      MESSAGE:
+        description: message that goes in the json
+        type: string
+        required: true
+
+    secrets:
+      SLACK_BOT_TOKEN:
+        required: true      
+
+jobs:
+
+  environment_gate:
+    runs-on: ${{ inputs.RUNS_ON }}
+    steps:
+
+      - name: Slack Message
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : "${{ inputs.MESSAGE }}"
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

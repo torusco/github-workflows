@@ -1,0 +1,88 @@
+name: "Terraform Pull Request Checkov Tests v7.1"
+
+on:
+  workflow_call:
+    inputs:
+      CDK_PREFIX:
+        type: string
+        required: true
+
+      ENVIRONMENT_LONG_NAME:
+        type: string
+        required: true
+
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
+      TARGET_TERRAFORM_FOLDER_NAME:
+        type: string
+        required: true
+
+    secrets:
+      # required for using github package manager
+      NPM_TOKEN:
+        required: true
+
+env:
+  PYTHON_VERSION: "3.10"
+  TERRAFORM_VERSION: "1.6.4"
+
+jobs:
+  terraform_checkov:
+    runs-on: ${{ inputs.RUNS_ON }}
+    steps:
+      - name: echo
+        run: |
+          echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+
+      - if: github.event.client_payload.ref != ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use ${{ github.event.client_payload.ref }} not ${{ github.ref }}"
+          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref != ''
+        name: actions/checkout@v3 client payload ref
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.client_payload.ref }}
+
+      - if: github.event.client_payload.ref == ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use default ${{ github.ref }}"
+          echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref == ''
+        name: actions/checkout@v3 default ref
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install checkov
+        run: |
+          python -c "import sys; print(sys.version)"
+          pip install checkov
+
+      - name: Terraform Setup
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: true
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Environment Variables
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_TORUS_ENVIRONMENT=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
+
+      - name: Terraform Checkov
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          terraform --version
+          checkov -d .

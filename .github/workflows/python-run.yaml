@@ -1,4 +1,4 @@
-name: "Terraform Apply v7.3"
+name: "Python Run v7"
 
 on:
   workflow_call:
@@ -8,6 +8,7 @@ on:
         required: true
 
       CDK_PREFIX:
+        description: environment instance name is used to select the environment gate and to deploy code
         type: string
         required: true
 
@@ -15,14 +16,19 @@ on:
         type: string
         required: true
 
-      PIP_INSTALL_REQUIREMENTS_FILE:
+      PY_FOLDER_NAME:
+        description: "use this folder py- folder that contains the script, requirements.txt, and other files"
         type: string
-        required: false
-        description: "if included, the action will run pip3 install for the provided requirements files"
+        required: true
 
+      PY_VERSION:
+        description: "the python version to install, ex 3.10 or 3.11"
+        type: string
+        required: true
+  
       RUNS_ON:
         type: string
-        required: false
+        required: true
         default: ubuntu-latest
 
       SAML_AWS_ROLE_ARN:
@@ -37,26 +43,12 @@ on:
         type: string
         required: true
 
-      TARGET_TERRAFORM_FOLDER_NAME:
+      PY_RUN_COMMAND:
         type: string
         required: true
 
-      TERRAFORM_RESOURCE_TO_REPLACE:
-        type: string
-        required: false
-        description: "fully qualified resource name to force replace, if needed, after normal terraform run"
-
-      TERRAFORM_VAR_FILE:
-        type: string
-        required: true
-        description: "most var files are just -var-file=./<env long name>/.tfvars but some use instance specific variables such as -var-file=./<env long name>/<cdk prefix>.tfvars"
-
+      # put uses flags at end
       USES_CLOUDFLARE:
-        type: boolean
-        required: false
-        default: false
-
-      USES_DATADOG:
         type: boolean
         required: false
         default: false
@@ -65,12 +57,22 @@ on:
         type: boolean
         required: false
         default: false
-
-      USES_OKTA:
+  
+      USES_METABASE:
         type: boolean
         required: false
         default: false
 
+      USES_PIP:
+        type: boolean
+        required: false
+        default: true
+    
+      USES_POETRY:
+        type: boolean
+        required: false
+        default: false
+    
       USES_STRIPE:
         type: boolean
         required: false
@@ -81,14 +83,6 @@ on:
       CLOUDFLARE_API_TOKEN: 
         required: false
 
-      # only required if using datadog provider
-      DD_API_KEY: 
-        required: false
-
-      # only required if using datadog provider
-      DD_APP_KEY: 
-        required: false
-
       # only required if using fivetran provider
       FIVETRAN_APIKEY: 
         required: false
@@ -97,8 +91,12 @@ on:
       FIVETRAN_APISECRET: 
         required: false
 
-      # only required if using okta provider
-      OKTA_API_TOKEN: 
+      # only required if using metabase provider
+      METABASE_USER: 
+        required: false
+
+      # only required if using metabase provider
+      METABASE_PASS: 
         required: false
 
       # only required if using stripe provider
@@ -109,23 +107,24 @@ on:
       SLACK_BOT_TOKEN:
         required: false
 
-env:
-  TERRAFORM_VERSION: "1.6.4"
+      # required for GITHUB checkout / NPM_TOKEN on other workflows
+      CHECKOUT_TOKEN:
+        required: true
 
 jobs:
 
-  terraform:
+  python_run:
 
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
+
       - name: echo
         run: |
-          echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          echo PY_FOLDER_NAME ${{ inputs.PY_FOLDER_NAME }}
           echo SAML_AWS_ROLE_ARN ${{ inputs.SAML_AWS_ROLE_ARN }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
-          echo "SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }}" >> $GITHUB_ENV  # was this debug or because slack was being weird in this file?
 
       - if: github.event.client_payload.ref != ''
         name: GITHUB_CHECKOUT_REF
@@ -138,6 +137,7 @@ jobs:
         name: actions/checkout@v3 client payload ref
         uses: actions/checkout@v3
         with:
+          token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
           ref: ${{ github.event.client_payload.ref }}
 
       - if: github.event.client_payload.ref == ''
@@ -150,7 +150,14 @@ jobs:
       - if: github.event.client_payload.ref == ''
         name: actions/checkout@v3 default ref
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
 
+      - name: Set up Python ${{ inputs.PY_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.PY_VERSION }}
+            
       - uses: saml-to/assume-aws-role-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -159,63 +166,57 @@ jobs:
           region: ${{ inputs.AWS_REGION }}
           provider: awsProduction
 
-      - if: inputs.PIP_INSTALL_REQUIREMENTS_FILE != ''
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'       
-          cache: 'pip' # caching pip dependencies
+      - name: pip install
+        if: "${{ inputs.USES_PIP != '' }}"
+        run: |
+            cd ${{ inputs.PY_FOLDER_NAME }}
+            pip install -r requirements.txt
 
-      - if: inputs.PIP_INSTALL_REQUIREMENTS_FILE != ''
-        name: Pip3 Install
-        run: pip3 install -r ${{ inputs.PIP_INSTALL_REQUIREMENTS_FILE }}
-          
-      - name: Terraform Setup
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_wrapper: true
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
+      - name: install poetry
+        if: "${{ inputs.USES_POETRY != '' }}"
+        uses: snok/install-poetry@v1
+    
+      - name: poetry install
+        if: "${{ inputs.USES_POETRY != '' }}"
+        run: |
+            cd ${{ inputs.PY_FOLDER_NAME }}
+            poetry install
+    
+      - name: ENV VARS
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "ENVIRONMENT_LONG_NAME=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
-      - name: Configure AWS
+      - name: Deployer Role
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
           role-duration-seconds: 3600
 
-      - name: Environment Variables
-        run: |
-          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
-          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
-          echo "TF_VAR_TORUS_ENVIRONMENT=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
-
       - name: CloudFlare Variables
         if: "${{ inputs.USES_CLOUDFLARE != '' }}"
         run: |
           echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
-
-      - name: Datadog Variables
-        if: "${{ inputs.USES_DATADOG != '' }}"
-        run: |
-          echo "DD_API_KEY=${{ secrets.DD_API_KEY }}" >> $GITHUB_ENV
-          echo "DD_APP_KEY=${{ secrets.DD_APP_KEY }}" >> $GITHUB_ENV
   
       - name: Fivetran Variables
         if: "${{ inputs.USES_FIVETRAN != '' }}"
         run: |
           echo "FIVETRAN_APIKEY=${{ secrets.FIVETRAN_APIKEY }}" >> $GITHUB_ENV
           echo "FIVETRAN_APISECRET=${{ secrets.FIVETRAN_APISECRET }}" >> $GITHUB_ENV
-
-      - name: Okta Variables
-        if: "${{ inputs.USES_OKTA != '' }}"
+  
+      - name: Metabase Variables
+        if: "${{ inputs.USES_METABASE != '' }}"
         run: |
-          echo "OKTA_API_TOKEN=${{ secrets.OKTA_API_TOKEN }}" >> $GITHUB_ENV
+          echo "METABASE_USER=${{ secrets.METABASE_USER }}" >> $GITHUB_ENV
+          echo "METABASE_PASS=${{ secrets.METABASE_PASS }}" >> $GITHUB_ENV
 
       - name: Stripe Variables
         if: "${{ inputs.USES_STRIPE != '' }}"
         run: |
           echo "STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}" >> $GITHUB_ENV
-
-      - name: Slack Terraform Start
+  
+      - name: Slack PY Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.23.0
@@ -223,32 +224,17 @@ jobs:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
             {
-              "text" : ":large_yellow_circle: :terraform: Terraforming! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":large_yellow_circle: :python: Running! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: Terraform Init
+      - name: Python Run
         run: |
-          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          terraform --version
-          terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure
-          terraform workspace select -or-create $CDK_PREFIX 
-
-      - name: Terraform Plan and Apply
-        run: |
-          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          terraform plan -var-file=${{ inputs.TERRAFORM_VAR_FILE }} -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
-          terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
-
-      - name: Terraform Resource Plan and Apply
-        if: "${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE != '' }}"
-        run: |
-          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          terraform plan -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} -var-file=${{ inputs.TERRAFORM_VAR_FILE }} -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
-          terraform apply -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
-
-      - name: Slack Terraform Complete
+          cd ${{ inputs.PY_FOLDER_NAME }}
+          ${{ inputs.PY_RUN_COMMAND }}
+          
+      - name: Slack PY Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.23.0
         with:
@@ -256,12 +242,12 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-passed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-passed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: Slack Terraform Failure
+      - name: Slack PY Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.23.0
         with:
@@ -269,12 +255,12 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-failed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-failed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: Slack Terraform Cancelled
+      - name: Slack Python Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.23.0
         with:
@@ -282,7 +268,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":black_square_for_stop: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":black_square_for_stop: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}          
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

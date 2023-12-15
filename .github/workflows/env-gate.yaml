@@ -1,0 +1,116 @@
+name: "Environment Gate Check v7.3"
+
+on:
+  workflow_call:
+    inputs:
+
+      CDK_PREFIX:
+        description: environment instance name is used to select the environment gate and to deploy CDK and Terraform code
+        type: string
+        required: true
+
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
+      SLACK_CHANNEL_ID:
+        type: string
+        required: true
+  
+    secrets:
+      SLACK_BOT_TOKEN:
+        required: true
+
+jobs:
+
+  pre_check_gate:
+    runs-on: ${{ inputs.RUNS_ON }}
+    outputs:
+      ts: ${{ steps.slack.outputs.ts }}
+    steps:
+
+      - if: github.event.client_payload.ref != ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use ${{ github.event.client_payload.ref }} not ${{ github.ref }}"
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref == ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use default ${{ github.ref }}"
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Slack Message
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : ":eyes: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} waiting for approval... <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> :click-here: <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}       
+
+  environment_gate:
+    needs: [ pre_check_gate ]
+    runs-on: ${{ inputs.RUNS_ON }}
+    environment: ${{ inputs.CDK_PREFIX }}
+    steps:
+      - if: github.event.client_payload.ref != ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use ${{ github.event.client_payload.ref }} not ${{ github.ref }}"
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref == ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use default ${{ github.ref }}"
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Check CDK_PREFIX
+        run: | 
+          echo "Environment Gate ${{ inputs.RUNS_ON }} ${{ inputs.CDK_PREFIX }}"
+          if [ -z  "${{ inputs.CDK_PREFIX }}"]; then
+            echo "Missing CDK_PREFIX!  Please check your yaml! :)"
+            exit 1
+          fi
+
+      - name: Approved
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ env.TS}}
+          payload: |
+            {
+              "text" : ":check-passed: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} approved! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
+          TS: ${{ needs.pre_check_gate.outputs.ts }}        
+
+      - name: Cancelled
+        if: "${{ cancelled() }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ env.TS}}
+          payload: |
+            {
+              "text" : ":black_square_for_stop: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} cancelled! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
+          TS: ${{ needs.pre_check_gate.outputs.ts }}        
+  

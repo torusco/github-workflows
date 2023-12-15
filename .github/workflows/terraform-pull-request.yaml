@@ -1,4 +1,4 @@
-name: "Terraform Pull Requests v5"
+name: "Terraform Pull Requests v7"
 
 on:
   workflow_call:
@@ -14,6 +14,11 @@ on:
       ENVIRONMENT_LONG_NAME:
         type: string
         required: true
+
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
 
       SAML_AWS_ROLE_ARN:
         type: string
@@ -48,22 +53,25 @@ on:
         required: false
 
       # only required if using fivetran provider
-      TF_VAR_FIVETRAN_API_KEY: 
+      FIVETRAN_APIKEY: 
         required: false
 
       # only required if using fivetran provider
-      TF_VAR_FIVETRAN_API_SECRET: 
+      FIVETRAN_APISECRET: 
         required: false
 
       # only required if using stripe provider
       STRIPE_API_KEY:
         required: false
 
+env:
+  TERRAFORM_VERSION: "1.6.4"
+        
 jobs:
 
   terraform:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.RUNS_ON }}
     steps:
       - uses: actions/checkout@v3
 
@@ -79,10 +87,10 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: true
-          terraform_version: 1.3.9
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
@@ -102,8 +110,8 @@ jobs:
       - name: Fivetran Variables
         if: "${{ inputs.USES_FIVETRAN != '' }}"
         run: |
-          echo "TF_VAR_FIVETRAN_API_KEY=${{ secrets.TF_VAR_FIVETRAN_API_KEY }}" >> $GITHUB_ENV
-          echo "TF_VAR_FIVETRAN_API_SECRET=${{ secrets.TF_VAR_FIVETRAN_API_SECRET }}" >> $GITHUB_ENV
+          echo "FIVETRAN_APIKEY=${{ secrets.FIVETRAN_APIKEY }}" >> $GITHUB_ENV
+          echo "FIVETRAN_APISECRET=${{ secrets.FIVETRAN_APISECRET }}" >> $GITHUB_ENV
 
       - name: Stripe Variables
         if: "${{ inputs.USES_STRIPE != '' }}"
