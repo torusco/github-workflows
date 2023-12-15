@@ -4,10 +4,6 @@ on:
   workflow_call:
     inputs:
     
-      AWS_REGION:
-        type: string
-        required: true
-
       RUNS_ON:
         type: string
         required: false
