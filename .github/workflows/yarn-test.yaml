@@ -13,10 +13,6 @@ on:
         required: false
         default: ubuntu-latest
 
-      SAML_AWS_ROLE_ARN:
-        type: string
-        required: true
-
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: false
@@ -82,14 +78,6 @@ jobs:
           always-auth: true
           scope: '@torusco'
           cache: 'yarn'      
-
-      - uses: saml-to/assume-aws-role-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
-          region: ${{ inputs.AWS_REGION }}
-          provider: awsProduction
 
       - name: yarn install && yarn build
         run: |

@@ -20,10 +20,6 @@ on:
         required: false
         default: ubuntu-latest
 
-      SAML_AWS_ROLE_ARN:
-        type: string
-        required: true
-
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
@@ -74,14 +70,6 @@ jobs:
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
       - uses: actions/checkout@v3
-
-      - uses: saml-to/assume-aws-role-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
-          region: ${{ inputs.AWS_REGION }}
-          provider: awsProduction
 
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v2
