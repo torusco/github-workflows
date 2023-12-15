@@ -48,6 +48,11 @@ jobs:
   airflow_waiter:
 
     runs-on: ${{ inputs.RUNS_ON }}
+
+    permissions: # github oidc
+      id-token: write
+      contents: read
+
     steps:
 
       - name: echo

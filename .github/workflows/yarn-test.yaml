@@ -45,6 +45,11 @@ jobs:
   cdk_test:
 
     runs-on: ${{ inputs.RUNS_ON }}
+
+    permissions: # github oidc
+      id-token: write
+      contents: read
+
     steps:
 
       - name: Checkout USES_SONAR_CLOUD and USES_SONAR_CLOUD_MAIN_ANALYSIS

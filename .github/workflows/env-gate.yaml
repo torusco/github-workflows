@@ -26,8 +26,14 @@ jobs:
 
   pre_check_gate:
     runs-on: ${{ inputs.RUNS_ON }}
+
+    permissions: # github oidc
+      id-token: write
+      contents: read
+
     outputs:
       ts: ${{ steps.slack.outputs.ts }}
+
     steps:
 
       - if: github.event.client_payload.ref != ''

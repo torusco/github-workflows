@@ -68,6 +68,11 @@ jobs:
   terraform:
 
     runs-on: ${{ inputs.RUNS_ON }}
+
+    permissions: # github oidc
+      id-token: write
+      contents: read
+
     steps:
       - uses: actions/checkout@v3
 
