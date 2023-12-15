@@ -31,10 +31,6 @@ on:
         required: true
         default: ubuntu-latest
 
-      SAML_AWS_ROLE_ARN:
-        type: string
-        required: true
-
       SLACK_CHANNEL_ID:
         type: string
         required: false
@@ -121,7 +117,6 @@ jobs:
       - name: echo
         run: |
           echo PY_FOLDER_NAME ${{ inputs.PY_FOLDER_NAME }}
-          echo SAML_AWS_ROLE_ARN ${{ inputs.SAML_AWS_ROLE_ARN }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
@@ -158,14 +153,6 @@ jobs:
         with:
           python-version: ${{ inputs.PY_VERSION }}
             
-      - uses: saml-to/assume-aws-role-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          role: ${{ inputs.SAML_AWS_ROLE_ARN }}
-          region: ${{ inputs.AWS_REGION }}
-          provider: awsProduction
-
       - name: pip install
         if: "${{ inputs.USES_PIP != '' }}"
         run: |
