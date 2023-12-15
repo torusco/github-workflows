@@ -89,12 +89,11 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
-      - name: Deployer Role
-        uses: aws-actions/configure-aws-credentials@v3
+      - name: Deployer Role with Github OIDC Provider
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-          aws-region: ${{ inputs.AWS_REGION }}
-          role-duration-seconds: 3600
+            role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
+            aws-region: ${{inputs.AWS_REGION}}
 
       - name: Slack CDK Start
         id: slack

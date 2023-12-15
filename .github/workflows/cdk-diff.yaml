@@ -74,12 +74,11 @@ jobs:
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
           echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
-      - name: Deployer Role
-        uses: aws-actions/configure-aws-credentials@v3
+      - name: Deployer Role with Github OIDC Provider
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-          aws-region: ${{ inputs.AWS_REGION }}
-          role-duration-seconds: 3600
+            role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
+            aws-region: ${{inputs.AWS_REGION}}
 
       - name: CDK Diff
         run: |

@@ -31,12 +31,8 @@ env:
 
 jobs:
   terraform_checkov:
-    
-    runs-on: ${{ inputs.RUNS_ON }}
 
-    permissions: # github oidc
-      id-token: write
-      contents: read
+    runs-on: ${{ inputs.RUNS_ON }}
 
     steps:
       - name: echo
