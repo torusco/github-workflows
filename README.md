@@ -32,16 +32,15 @@ env-gate example:
 
 ```
 
-yarn-test unit example:
+yarn-test unit example for sonarcloud
 ```
-  yarn_test_cdks:
+  update_sonar_main_analysis:
 
-    needs: [ globals ]
-    uses: torusco/github-workflows/.github/workflows/yarn-test.yaml@v7
+    uses: torusco/github-workflows/.github/workflows/yarn-test.yaml@v8
     with:
-      AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
-      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON }}
-      YARN_TEST_COMMAND: "yarn pipeline:test"
+      YARN_TEST_COMMAND: yarn pipeline-test
+      USES_SONAR_CLOUD: true
+      USES_SONAR_CLOUD_MAIN_ANALYSIS: true
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
