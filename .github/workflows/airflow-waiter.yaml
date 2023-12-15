@@ -1,4 +1,4 @@
-name: "Airflow Waiter v7"
+name: "Airflow Waiter v8"
 
 on:
   workflow_call:

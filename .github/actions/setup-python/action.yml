@@ -1,4 +1,4 @@
-name: "Setup Python v7"
+name: "Setup Python v8"
 inputs:
   python_version:
     type: string

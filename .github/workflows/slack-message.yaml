@@ -1,4 +1,4 @@
-name: "Slack Message v7"
+name: "Slack Message v8"
 # sends a slack message to a channel, not smart (not updating), so don't be verbose
 
 on:
