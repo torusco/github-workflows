@@ -1,4 +1,4 @@
-name: "Environment Gate Check v7.3"
+name: "Environment Gate Check  v8"
 
 on:
   workflow_call:

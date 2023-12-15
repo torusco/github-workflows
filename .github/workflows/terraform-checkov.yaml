@@ -1,4 +1,4 @@
-name: "Terraform Pull Request Checkov Tests v7.1"
+name: "Terraform Pull Request Checkov Tests v8"
 
 on:
   workflow_call:
