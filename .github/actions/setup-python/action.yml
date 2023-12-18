@@ -1,4 +1,5 @@
 name: "Setup Python v8"
+# not tested in v8
 inputs:
   python_version:
     type: string
