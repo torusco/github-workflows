@@ -116,6 +116,25 @@
 ## python-run
 
 ```
+  python_metabase_example:
+    needs: [ globals, ... ]
+    uses: torusco/github-workflows/.github/workflows/python-run.yaml@v8
+    with:
+      PY_FOLDER_NAME: 'py-metabase-config'
+      PY_VERSION: '3.11'
+      PY_RUN_COMMAND: 'python ga-configure-metabase-redshift.py'
+      AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
+      CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
+      ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
+      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_PY }}
+      SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
+      TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+      USES_METABASE: true
+    secrets:
+      CHECKOUT_TOKEN: ${{ secrets.NPM_TOKEN }}            
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      METABASE_USER: ${{ secrets.METABASE_USER }}
+      METABASE_PASS: ${{ secrets.METABASE_PASS }}    
 ```
 
 ## slack-message
