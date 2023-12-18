@@ -245,5 +245,20 @@ note: renamed from yarn-test
 ## terraform-pull-request
 
 ```
+  tf_pull_request:
+
+    needs: globals
+    uses: torusco/github-workflows/.github/workflows/terraform-pull-request.yaml@v8
+    with:
+      AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
+      CDK_PREFIX: "shortname"
+      ENVIRONMENT_LONG_NAME: "longname"
+      TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+      TARGET_TERRAFORM_FOLDER_NAME: tf-name
+      TERRAFORM_VAR_FILE: ./${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}/.tfvars
+      USES_CLOUDFLARE: true
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
 ```
 

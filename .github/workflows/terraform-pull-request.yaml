@@ -28,6 +28,11 @@ on:
         type: string
         required: true
 
+      TERRAFORM_VAR_FILE:
+        type: string
+        required: true
+        description: "most var files are just -var-file=./<env long name>/.tfvars but some use instance specific variables such as -var-file=./<env long name>/<cdk prefix>.tfvars"
+  
       TERRAFORM_VERSION:
         type: string
         required: false
@@ -84,6 +89,7 @@ jobs:
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          echo TERRAFORM_VAR_FILE ${{ inputs.TERRAFORM_VAR_FILE }}
           echo TERRAFORM_VERSION ${{ inputs.TERRAFORM_VERSION }}
           echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
           echo USES_FIVETRAN ${{ inputs.USES_FIVETRAN }}
@@ -137,4 +143,4 @@ jobs:
       - name: Terraform Plan
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          terraform plan -var-file=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/.tfvars -input=false -lock=false -compact-warnings
+          terraform plan -var-file=${{ inputs.TERRAFORM_VAR_FILE }} -input=false -lock=false -compact-warnings
