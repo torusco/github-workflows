@@ -154,11 +154,6 @@ note: renamed from yarn-test
 
 ```
 
-## mobile-jira
-
-```
-```
-
 ## python-run
 
 ```
