@@ -12,8 +12,8 @@
 
 * based on v7.3
 * switch to github oidc provider (remove SAML and saml.to)
-* terraform base version 1.6.6 and now parameterized as input
-* PY_VERSION python default is now 3.11 unless you pass it
+* TERRAFORM_VERSION terraform default is now 1.6.6 by default, is not required, and can be overriden
+* PY_VERSION python default is now 3.11 by default, is not required, and can be overriden
 * NODE_VERSION node default is now 20 by default, is not required, and can be overriden
 * RUNS_ON for cdk defaults to 8 cores, is no longer required, and can be overriden
 
@@ -24,6 +24,7 @@
 3. Delete all refs to SAML_AWS_ROLE_ARN including delet the now extra step where SAML was assumed, only aws-actions/configure-aws-credentials is needed now
 4. Update any Deployer role steps to configure aws credentials below and add permissions to any job that directly calls configure-aws-credentials
 5. Update TARGET_AWS_ACCOUNT_ROLE_ARN to be account based
+6. rename yarn-test to cdk-test
 
 # Examples
 
