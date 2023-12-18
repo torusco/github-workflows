@@ -96,6 +96,19 @@
 ## cdk-diff
 
 ```
+  long_short:
+
+    needs: [ globals ]
+    uses: torusco/github-workflows/.github/workflows/cdk-diff.yaml@v8
+    with:
+      AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
+      CDK_FOLDER_NAME: cdk-name
+      CDK_PREFIX: shortname
+      ENVIRONMENT_LONG_NAME: "longname"
+      TARGET_AWS_ACCOUNT_ROLE_ARN: "arn:aws:iam::ACCOUNT:role/ROLE"
+      YARN_DIFF_COMMAND: "yarn pipeline:diff"
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
 ## cdk-test
