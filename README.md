@@ -24,7 +24,9 @@
 3. Delete all refs to SAML_AWS_ROLE_ARN including delet the now extra step where SAML was assumed, only aws-actions/configure-aws-credentials is needed now
 4. Update any Deployer role steps to configure aws credentials below and add permissions to any job that directly calls configure-aws-credentials
 5. Update TARGET_AWS_ACCOUNT_ROLE_ARN to be account based
-6. rename yarn-test to cdk-test
+6. Rename yarn-test to cdk-test
+7. Remove RUNS_ON unless you want to override
+8. Add any overrides for TERRAFORM_VERSION, PY_VERSION, NODE_VERSION but recommendation is to remove and not override
 
 # Examples
 
