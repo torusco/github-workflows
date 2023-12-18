@@ -51,6 +51,22 @@
 ## airflow-waiter
 
 ```
+  check_airflow_is_ready:
+    if: ${{ !contains( github.event.pull_request.labels.*.name, 'data_skip_airflow') }}
+    needs: [ globals, ... ]
+    uses: torusco/github-workflows/.github/workflows/airflow-waiter.yaml@v8
+    with:
+      AIRFLOW_ENVIRONMENT_NAME: ${{ needs.globals.outputs.AIRFLOW_ENVIRONMENT_NAME }}
+      AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
+      CDK_PREFIX: ${{ needs.globals.outputs.ENVIRONMENT_SHORT_NAME }}
+      ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
+      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
+      SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
+      TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+    secrets:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }} 
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
 ```
 
 ## cdk-deploy
