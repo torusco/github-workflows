@@ -47,6 +47,11 @@ on:
         required: true
         description: "most var files are just -var-file=./<env long name>/.tfvars but some use instance specific variables such as -var-file=./<env long name>/<cdk prefix>.tfvars"
 
+      TERRAFORM_VERSION:
+        type: string
+        required: false
+        default: "1.6.6"
+
       USES_CLOUDFLARE:
         type: boolean
         required: false
@@ -105,9 +110,6 @@ on:
       SLACK_BOT_TOKEN:
         required: false
 
-env:
-  TERRAFORM_VERSION: "1.6.4"
-
 jobs:
 
   terraform:
@@ -162,10 +164,10 @@ jobs:
         run: pip3 install -r ${{ inputs.PIP_INSTALL_REQUIREMENTS_FILE }}
           
       - name: Terraform Setup
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_wrapper: true
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_version: ${{ inputs.TERRAFORM_VERSION }}
 
       - name: Deployer Role with Github OIDC Provider
         uses: aws-actions/configure-aws-credentials@v4
