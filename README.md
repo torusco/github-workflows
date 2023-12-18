@@ -182,11 +182,6 @@ note: renamed from yarn-test
       METABASE_PASS: ${{ secrets.METABASE_PASS }}    
 ```
 
-## slack-message
-
-```
-```
-
 ## terraform-apply
 
 ```
