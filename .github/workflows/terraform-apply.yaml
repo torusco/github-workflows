@@ -176,7 +176,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{inputs.PY_VERSION}}    
-          cache: 'pip' # caching pip dependencies
 
       - if: inputs.PIP_INSTALL_REQUIREMENTS_FILE != ''
         name: Pip3 Install
