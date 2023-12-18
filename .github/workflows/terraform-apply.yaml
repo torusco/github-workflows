@@ -20,6 +20,11 @@ on:
         required: false
         description: "if included, the action will run pip3 install for the provided requirements files"
 
+      PY_VERSION:
+        description: "the python version to install, ex 3.10 or 3.11"
+        type: string
+        required: false
+
       RUNS_ON:
         type: string
         required: false
@@ -123,9 +128,23 @@ jobs:
     steps:
       - name: echo
         run: |
-          echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
-          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
+          echo ENVIRONMENT_LONG_NAME ${{ inputs.ENVIRONMENT_LONG_NAME }}
+          echo PIP_INSTALL_REQUIREMENTS_FILE ${{ inputs.PIP_INSTALL_REQUIREMENTS_FILE }}
+          echo PY_VERSION ${{ inputs.PY_VERSION }}
+          echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          echo TERRAFORM_RESOURCE_TO_REPLACE ${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }}
+          echo TERRAFORM_VAR_FILE ${{ inputs.TERRAFORM_VAR_FILE }}
+          echo TERRAFORM_VERSION ${{ inputs.TERRAFORM_VERSION }}
+          echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
+          echo USES_DATADOG ${{ inputs.USES_DATADOG }}
+          echo USES_FIVETRAN ${{ inputs.USES_FIVETRAN }}
+          echo USES_OKTA ${{ inputs.USES_OKTA }}
+          echo USES_STRIPE ${{ inputs.USES_STRIPE }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
           echo "SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }}" >> $GITHUB_ENV  # was this debug or because slack was being weird in this file?
 
@@ -153,10 +172,10 @@ jobs:
         name: actions/checkout@v3 default ref
         uses: actions/checkout@v3
 
-      - if: inputs.PIP_INSTALL_REQUIREMENTS_FILE != ''
+      - if: inputs.PY_VERSION != ''
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'       
+          python-version: ${{inputs.PY_VERSION}}    
           cache: 'pip' # caching pip dependencies
 
       - if: inputs.PIP_INSTALL_REQUIREMENTS_FILE != ''

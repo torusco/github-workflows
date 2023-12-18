@@ -145,6 +145,44 @@
 ## terraform-apply
 
 ```
+  tf_fivetran_with_python:
+    needs: [globals, ... ]
+    uses: torusco/github-workflows/.github/workflows/terraform-apply.yaml@v8
+    with:
+      TARGET_TERRAFORM_FOLDER_NAME: tf-fivetran-name
+      TERRAFORM_VAR_FILE: ./${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}/${{ needs.globals.outputs.CDK_PREFIX }}.tfvars
+      PIP_INSTALL_REQUIREMENTS_FILE: ./tf-fivetran-name/requirements.txt
+      PY_VERSION: "3.11"
+      AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
+      CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
+      ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
+      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
+      SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
+      TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+      USES_FIVETRAN: true
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      FIVETRAN_APIKEY: ${{ secrets.FIVETRAN_APIKEY }}
+      FIVETRAN_APISECRET: ${{ secrets.FIVETRAN_APISECRET }}
+```
+
+```
+  tf_uses_cloudflare:
+    needs: [globals, cdk_redshift]
+    uses: torusco/github-workflows/.github/workflows/terraform-apply.yaml@v8
+    with:
+      TARGET_TERRAFORM_FOLDER_NAME: tf-cloudflare-name
+      TERRAFORM_VAR_FILE: ./${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}/.tfvars
+      AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
+      CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
+      ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
+      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
+      SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
+      TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+      USES_CLOUDFLARE: true
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 ```
 
 ## terraform-checkov
