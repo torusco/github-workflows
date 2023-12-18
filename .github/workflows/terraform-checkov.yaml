@@ -75,11 +75,9 @@ jobs:
         name: actions/checkout@v3 default ref
         uses: actions/checkout@v3
 
-      - if: inputs.PY_VERSION != ''
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ inputs.PY_VERSION }}
-          cache: 'pip' # caching pip dependencies
 
       - name: Install checkov
         run: |
