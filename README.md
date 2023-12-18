@@ -13,6 +13,7 @@
 * based on v7.3
 * switch to github oidc provider (remove SAML and saml.to)
 * terraform base version 1.6.6 and now parameterized as input
+* python default is now 3.11 unless you pass it
 
 ## steps to migrate to this version
 
@@ -188,6 +189,16 @@
 ## terraform-checkov
 
 ```
+    terraform_checkov_name:
+        needs: [globals]
+        uses: torusco/github-workflows/.github/workflows/terraform-checkov.yaml@v8
+        with:
+            TARGET_TERRAFORM_FOLDER_NAME: tf-name
+            CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
+            ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
+            RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
+        secrets:
+            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
 ## terraform-pull-request

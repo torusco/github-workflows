@@ -24,6 +24,7 @@ on:
         description: "the python version to install, ex 3.10 or 3.11"
         type: string
         required: false
+        default: "3.11"
 
       RUNS_ON:
         type: string
@@ -146,7 +147,6 @@ jobs:
           echo USES_OKTA ${{ inputs.USES_OKTA }}
           echo USES_STRIPE ${{ inputs.USES_STRIPE }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
-          echo "SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }}" >> $GITHUB_ENV  # was this debug or because slack was being weird in this file?
 
       - if: github.event.client_payload.ref != ''
         name: GITHUB_CHECKOUT_REF

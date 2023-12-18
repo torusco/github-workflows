@@ -10,7 +10,13 @@ on:
       ENVIRONMENT_LONG_NAME:
         type: string
         required: true
-
+      
+      PY_VERSION:
+        description: "the python version to install, ex 3.10 or 3.11"
+        type: string
+        required: false
+        default: "3.11"
+  
       RUNS_ON:
         type: string
         required: false
@@ -31,9 +37,6 @@ on:
       NPM_TOKEN:
         required: true
 
-env:
-  PYTHON_VERSION: "3.10"
-
 jobs:
   terraform_checkov:
 
@@ -42,7 +45,13 @@ jobs:
     steps:
       - name: echo
         run: |
+          echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
+          echo ENVIRONMENT_LONG_NAME ${{ inputs.ENVIRONMENT_LONG_NAME }}
+          echo PY_VERSION ${{ inputs.PY_VERSION }}
+          echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          echo TERRAFORM_VERSION ${{ inputs.TERRAFORM_VERSION }}
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref != ''
         name: GITHUB_CHECKOUT_REF
@@ -66,10 +75,11 @@ jobs:
         name: actions/checkout@v3 default ref
         uses: actions/checkout@v3
 
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
+      - if: inputs.PY_VERSION != ''
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ inputs.PY_VERSION }}
+          cache: 'pip' # caching pip dependencies
 
       - name: Install checkov
         run: |
