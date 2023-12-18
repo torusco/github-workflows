@@ -222,47 +222,14 @@
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
-
-
-
-## old
-
-env-gate example:
 ```
-  testqa_env_gate:
-    needs: [ globals ]
-    uses: torusco/github-workflows/.github/workflows/env-gate.yaml@v7
-    with:
-      CDK_PREFIX: "dt1"
-      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON }}
-
-```
-
-yarn-test unit example for sonarcloud
-```
-  update_sonar_main_analysis:
-
-    uses: torusco/github-workflows/.github/workflows/yarn-test.yaml@v8
-    with:
-      YARN_TEST_COMMAND: yarn pipeline-test
-      USES_SONAR_CLOUD: true
-      USES_SONAR_CLOUD_MAIN_ANALYSIS: true
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-```
-
-terraform-checkov example:
-```
-    terraform_checkov_datadog:
+    yarn_test_cdks:
         needs: [globals]
-        uses: torusco/github-workflows/.github/workflows/terraform-checkov.yaml@v7.1
+        uses: torusco/github-workflows/.github/workflows/yarn-test.yaml@v8
         with:
-            TARGET_TERRAFORM_FOLDER_NAME: tf-datadog
-            CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
-            ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
-            RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
+            RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_CDK }}
+            YARN_TEST_COMMAND: 'yarn pipeline-test'
         secrets:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
 ```
