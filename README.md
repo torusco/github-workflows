@@ -72,6 +72,21 @@
 ## cdk-deploy
 
 ```
+  cdk_example:
+    needs: [globals]
+    uses: torusco/github-workflows/.github/workflows/cdk-deploy.yaml@v8
+    with:
+      CDK_FOLDER_NAME: 'cdk-folder-name'
+      YARN_DEPLOY_COMMAND: 'yarn pipeline-deploy-folder-name'
+      AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
+      CDK_PREFIX: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
+      ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
+      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_CDK }}
+      SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
+      TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }} 
 ```
 
 ## cdk-diff

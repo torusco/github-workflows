@@ -88,9 +88,17 @@ jobs:
 
       - name: echo
         run: |
-          echo CDK_FOLDER_NAME ${{ inputs.CDK_FOLDER_NAME }}
-          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo CDK_FOLDER_NAME ${{ inputs.CDK_FOLDER_NAME }}
+          echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
+          echo ENVIRONMENT_LONG_NAME ${{ inputs.ENVIRONMENT_LONG_NAME }}
+          echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo YARN_DEPLOY_COMMAND ${{ inputs.YARN_DEPLOY_COMMAND }}
+          echo YARN_FOLDER_NAME ${{ inputs.YARN_FOLDER_NAME }}
+          echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
+          echo USES_STRIPE ${{ inputs.USES_STRIPE }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref != ''
