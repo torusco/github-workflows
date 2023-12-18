@@ -97,6 +97,15 @@
 ## env-gate
 
 ```
+  gate_check:
+    needs: [globals]
+    uses: torusco/github-workflows/.github/workflows/env-gate.yaml@v8
+    with:
+      SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
+      CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
 ```
 
 ## mobile-jira
