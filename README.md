@@ -66,7 +66,6 @@
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_PREFIX: ${{ needs.globals.outputs.ENVIRONMENT_SHORT_NAME }}
       ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
-      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
       SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
       TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
     secrets:
@@ -87,7 +86,6 @@
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_PREFIX: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
       ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
-      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_CDK }}
       SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
       TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
     secrets:
@@ -123,7 +121,6 @@ note: renamed from yarn-test
         needs: [globals]
         uses: torusco/github-workflows/.github/workflows/cdk-test.yaml@v8
         with:
-            RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_CDK }}
             YARN_TEST_COMMAND: 'yarn pipeline-test'
         secrets:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -162,7 +159,6 @@ note: renamed from yarn-test
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
       ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
-      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_PY }}
       SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
       TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
       USES_METABASE: true
@@ -192,7 +188,6 @@ note: renamed from yarn-test
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
       ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
-      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
       SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
       TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
       USES_FIVETRAN: true
@@ -212,7 +207,6 @@ note: renamed from yarn-test
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
       ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
-      RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
       SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
       TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
       USES_CLOUDFLARE: true
@@ -231,7 +225,6 @@ note: renamed from yarn-test
             TARGET_TERRAFORM_FOLDER_NAME: tf-name
             CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
             ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
-            RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_TF }}
         secrets:
             NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
