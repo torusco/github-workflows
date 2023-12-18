@@ -33,7 +33,7 @@ on:
   
       RUNS_ON:
         type: string
-        required: true
+        required: false
         default: ubuntu-latest
 
       SLACK_CHANNEL_ID:
