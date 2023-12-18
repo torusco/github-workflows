@@ -76,6 +76,19 @@ jobs:
       contents: read
 
     steps:
+      - name: echo
+        run: |
+          echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
+          echo ENVIRONMENT_LONG_NAME ${{ inputs.ENVIRONMENT_LONG_NAME }}
+          echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          echo TERRAFORM_VERSION ${{ inputs.TERRAFORM_VERSION }}
+          echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
+          echo USES_FIVETRAN ${{ inputs.USES_FIVETRAN }}
+          echo USES_STRIPE ${{ inputs.USES_STRIPE }}
+
       - uses: actions/checkout@v3
 
       - name: Terraform Setup
