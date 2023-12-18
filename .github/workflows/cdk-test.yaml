@@ -1,13 +1,19 @@
-name: "Yarn Pull Request Unit Tests v8"
+name: "CDK Test v8"
+# was yarn-test.yaml, now cdk-test.yaml
 
 on:
   workflow_call:
     inputs:
     
+      NODE_VERSION:
+        type: string
+        required: false
+        default: '20'
+
       RUNS_ON:
         type: string
         required: false
-        default: ubuntu-latest
+        default: ubuntu-latest-8-cores
 
       YARN_TEST_COMMAND:
         type: string
@@ -42,6 +48,7 @@ jobs:
 
       - name: echo
         run: |
+          echo NODE_VERSION ${{ inputs.NODE_VERSION }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo YARN_TEST_COMMAND ${{ inputs.YARN_TEST_COMMAND }}
           echo USES_SONAR_CLOUD ${{ inputs.USES_SONAR_CLOUD }}
@@ -71,14 +78,14 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: use github as yarn registry
-        uses: actions/setup-node@v3 # Found that this action uses deprecated set-output command, filed bug with developers: https://github.com/actions/setup-node/issues/606
+        uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: ${{inputs.NODE_VERSION}}
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
           cache: 'yarn'      
-
+  
       - name: yarn install && yarn build
         run: |
           yarn install

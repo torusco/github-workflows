@@ -13,7 +13,9 @@
 * based on v7.3
 * switch to github oidc provider (remove SAML and saml.to)
 * terraform base version 1.6.6 and now parameterized as input
-* python default is now 3.11 unless you pass it
+* PY_VERSION python default is now 3.11 unless you pass it
+* NODE_VERSION node default is now 20 by default, is not required, and can be overriden
+* RUNS_ON for cdk defaults to 8 cores, is no longer required, and can be overriden
 
 ## steps to migrate to this version
 
@@ -93,6 +95,36 @@
 ## cdk-diff
 
 ```
+```
+
+## cdk-test
+
+note: renamed from yarn-test
+
+```
+  update_sonar_main_analysis:
+
+    if: ${{ !contains( github.event.pull_request.labels.*.name, 'nodeploy') || github.event.pull_request.merged == false }}
+    uses: torusco/github-workflows/.github/workflows/cdk-test.yaml@v8
+    with:
+      YARN_TEST_COMMAND: "yarn test"
+      USES_SONAR_CLOUD: true
+      USES_SONAR_CLOUD_MAIN_ANALYSIS: true
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+```
+    yarn_test_cdks:
+        needs: [globals]
+        uses: torusco/github-workflows/.github/workflows/cdk-test.yaml@v8
+        with:
+            RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_CDK }}
+            YARN_TEST_COMMAND: 'yarn pipeline-test'
+        secrets:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
 ## env-gate
@@ -206,30 +238,3 @@
 ```
 ```
 
-## yarn-test
-
-```
-  update_sonar_main_analysis:
-
-    if: ${{ !contains( github.event.pull_request.labels.*.name, 'nodeploy') || github.event.pull_request.merged == false }}
-    uses: torusco/github-workflows/.github/workflows/yarn-test.yaml@v8
-    with:
-      YARN_TEST_COMMAND: "yarn test"
-      USES_SONAR_CLOUD: true
-      USES_SONAR_CLOUD_MAIN_ANALYSIS: true
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-```
-
-```
-    yarn_test_cdks:
-        needs: [globals]
-        uses: torusco/github-workflows/.github/workflows/yarn-test.yaml@v8
-        with:
-            RUNS_ON: ${{ needs.globals.outputs.RUNS_ON_CDK }}
-            YARN_TEST_COMMAND: 'yarn pipeline-test'
-        secrets:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-```

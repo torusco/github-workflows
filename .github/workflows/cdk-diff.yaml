@@ -20,11 +20,16 @@ on:
         type: string
         required: true
 
+      NODE_VERSION:
+        type: string
+        required: false
+        default: '20'
+  
       RUNS_ON:
         type: string
         required: false
-        default: ubuntu-latest
-
+        default: ubuntu-latest-8-cores
+  
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
@@ -49,6 +54,17 @@ jobs:
       contents: read
 
     steps:
+      - name: echo
+        run: |
+          echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo CDK_FOLDER_NAME ${{ inputs.CDK_FOLDER_NAME }}
+          echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
+          echo ENVIRONMENT_LONG_NAME ${{ inputs.ENVIRONMENT_LONG_NAME }}
+          echo NODE_VERSION ${{ inputs.NODE_VERSION }}
+          echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo YARN_DIFF_COMMAND ${{ inputs.YARN_DIFF_COMMAND }}
+
       - uses: actions/checkout@v3
         with: 
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
@@ -56,12 +72,12 @@ jobs:
       - name: use github as yarn registry
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: ${{inputs.NODE_VERSION}}
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
           cache: 'yarn'      
-
+  
       - name: yarn install && yarn build
         run: |
           yarn install
@@ -72,7 +88,6 @@ jobs:
       - name: CDK_PREFIX
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
-          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
       - name: Deployer Role with Github OIDC Provider
         uses: aws-actions/configure-aws-credentials@v4

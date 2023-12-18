@@ -23,10 +23,15 @@ on:
         type: string
         required: true
 
+      NODE_VERSION:
+        type: string
+        required: false
+        default: '20'
+
       RUNS_ON:
         type: string
-        required: true
-        default: ubuntu-latest
+        required: false
+        default: ubuntu-latest-8-cores
 
       SLACK_CHANNEL_ID:
         type: string
@@ -92,6 +97,7 @@ jobs:
           echo CDK_FOLDER_NAME ${{ inputs.CDK_FOLDER_NAME }}
           echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
           echo ENVIRONMENT_LONG_NAME ${{ inputs.ENVIRONMENT_LONG_NAME }}
+          echo NODE_VERSION ${{ inputs.NODE_VERSION }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
@@ -131,7 +137,7 @@ jobs:
       - name: use github as yarn registry
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: ${{inputs.NODE_VERSION}}
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
