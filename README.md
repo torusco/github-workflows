@@ -46,11 +46,11 @@
 ```
 
 ```
-      - name: Deployer Role with Github OIDC Provider
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-            role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
-            aws-region: ${{inputs.AWS_REGION}}
+  - name: Deployer Role with Github OIDC Provider
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+        role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
+        aws-region: ${{inputs.AWS_REGION}}
 
 ```
 
@@ -64,7 +64,7 @@
     with:
       AIRFLOW_ENVIRONMENT_NAME: ${{ needs.globals.outputs.AIRFLOW_ENVIRONMENT_NAME }}
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
-      CDK_PREFIX: ${{ needs.globals.outputs.ENVIRONMENT_SHORT_NAME }}
+      CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
       ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
       SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
       TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
@@ -84,7 +84,7 @@
       CDK_FOLDER_NAME: 'cdk-folder-name'
       YARN_DEPLOY_COMMAND: 'yarn pipeline-deploy-folder-name'
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
-      CDK_PREFIX: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
+      CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
       ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
       SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
       TARGET_AWS_ACCOUNT_ROLE_ARN: ${{ needs.globals.outputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
