@@ -4,7 +4,7 @@ name: "CDK Test v8"
 on:
   workflow_call:
     inputs:
-    
+
       NODE_VERSION:
         type: string
         required: false
@@ -14,6 +14,27 @@ on:
         type: string
         required: false
         default: ubuntu-latest-8-cores
+
+      RUN_INTEGRATION_TESTS:
+        type: boolean
+        required: false
+        default: false
+        description: "should integration tests be run on this environment?"
+      
+      AWS_REGION:
+        type: string
+        required: false
+        default: ''
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: false
+        default: ''
+
+      YARN_EXPORTS_COMMAND:
+        type: string
+        required: false
+        default: ''
 
       YARN_TEST_COMMAND:
         type: string
@@ -43,6 +64,10 @@ jobs:
   cdk_test:
 
     runs-on: ${{ inputs.RUNS_ON }}
+    
+    permissions: # github oidc
+      id-token: write
+      contents: read
 
     steps:
 
@@ -50,6 +75,10 @@ jobs:
         run: |
           echo NODE_VERSION ${{ inputs.NODE_VERSION }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo RUN_INTEGRATION_TESTS ${{ inputs.RUN_INTEGRATION_TESTS }}
+          echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo YARN_EXPORTS_COMMAND ${{ inputs.YARN_EXPORTS_COMMAND }}
           echo YARN_TEST_COMMAND ${{ inputs.YARN_TEST_COMMAND }}
           echo USES_SONAR_CLOUD ${{ inputs.USES_SONAR_CLOUD }}
           echo USES_SONAR_CLOUD_MAIN_ANALYSIS ${{ inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS }}
@@ -93,6 +122,18 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Deployer Role with Github OIDC Provider
+        if: "${{ inputs.RUN_INTEGRATION_TESTS == true }}"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+            role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+            aws-region: ${{ inputs.AWS_REGION }}
+      
+      - name: ${{ inputs.YARN_EXPORTS_COMMAND }}
+        if: "${{ inputs.RUN_INTEGRATION_TESTS == true }}"
+        run: |
+          ${{ inputs.YARN_EXPORTS_COMMAND }}
+
       - name: ${{ inputs.YARN_TEST_COMMAND }}
         run: |
           ${{ inputs.YARN_TEST_COMMAND }}
@@ -110,6 +151,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-
-
