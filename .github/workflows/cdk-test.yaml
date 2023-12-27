@@ -20,6 +20,11 @@ on:
         required: false
         default: ''
 
+      CDK_PREFIX:
+        type: string
+        required: false
+        default: ''
+
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: false
@@ -77,6 +82,7 @@ jobs:
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo USES_INTEGRATION_EXPORTS ${{ inputs.USES_INTEGRATION_EXPORTS }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo YARN_EXPORTS_COMMAND ${{ inputs.YARN_EXPORTS_COMMAND }}
           echo YARN_TEST_COMMAND ${{ inputs.YARN_TEST_COMMAND }}
@@ -113,7 +119,12 @@ jobs:
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
-          cache: 'yarn'      
+          cache: 'yarn' 
+          
+      - name: CDK Prefix
+        if: "${{ inputs.USES_INTEGRATION_EXPORTS == true }}"
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
   
       - name: yarn install && yarn build
         run: |
