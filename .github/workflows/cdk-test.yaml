@@ -14,12 +14,6 @@ on:
         type: string
         required: false
         default: ubuntu-latest-8-cores
-
-      RUN_INTEGRATION_TESTS:
-        type: boolean
-        required: false
-        default: false
-        description: "should integration tests be run on this environment?"
       
       AWS_REGION:
         type: string
@@ -39,6 +33,12 @@ on:
       YARN_TEST_COMMAND:
         type: string
         required: true
+
+      USES_INTEGRATION_EXPORTS:
+        type: boolean
+        required: false
+        default: false
+        description: "should integration tests be run on this environment?"
       
       USES_SONAR_CLOUD:
         type: boolean
@@ -75,7 +75,7 @@ jobs:
         run: |
           echo NODE_VERSION ${{ inputs.NODE_VERSION }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
-          echo RUN_INTEGRATION_TESTS ${{ inputs.RUN_INTEGRATION_TESTS }}
+          echo USES_INTEGRATION_EXPORTS ${{ inputs.USES_INTEGRATION_EXPORTS }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo YARN_EXPORTS_COMMAND ${{ inputs.YARN_EXPORTS_COMMAND }}
@@ -123,14 +123,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Deployer Role with OIDC Provider
-        if: "${{ inputs.RUN_INTEGRATION_TESTS == true }}"
+        if: "${{ inputs.USES_INTEGRATION_EXPORTS == true }}"
         uses: aws-actions/configure-aws-credentials@v4
         with:
             role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
             aws-region: ${{ inputs.AWS_REGION }}
       
       - name: ${{ inputs.YARN_EXPORTS_COMMAND }}
-        if: "${{ inputs.RUN_INTEGRATION_TESTS == true }}"
+        if: "${{ inputs.USES_INTEGRATION_EXPORTS == true }}"
         run: |
           ${{ inputs.YARN_EXPORTS_COMMAND }}
 
