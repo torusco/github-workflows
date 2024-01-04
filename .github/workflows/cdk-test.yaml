@@ -4,7 +4,7 @@ name: "CDK Test v8"
 on:
   workflow_call:
     inputs:
-    
+
       NODE_VERSION:
         type: string
         required: false
@@ -14,10 +14,36 @@ on:
         type: string
         required: false
         default: ubuntu-latest-8-cores
+      
+      AWS_REGION:
+        type: string
+        required: false
+        default: ''
+
+      CDK_PREFIX:
+        type: string
+        required: false
+        default: ''
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: false
+        default: ''
+
+      YARN_EXPORTS_COMMAND:
+        type: string
+        required: false
+        default: ''
 
       YARN_TEST_COMMAND:
         type: string
         required: true
+
+      USES_INTEGRATION_EXPORTS:
+        type: boolean
+        required: false
+        default: false
+        description: "should integration tests be run on this environment?"
       
       USES_SONAR_CLOUD:
         type: boolean
@@ -43,6 +69,10 @@ jobs:
   cdk_test:
 
     runs-on: ${{ inputs.RUNS_ON }}
+    
+    permissions: # github oidc
+      id-token: write
+      contents: read
 
     steps:
 
@@ -50,6 +80,11 @@ jobs:
         run: |
           echo NODE_VERSION ${{ inputs.NODE_VERSION }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo USES_INTEGRATION_EXPORTS ${{ inputs.USES_INTEGRATION_EXPORTS }}
+          echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo YARN_EXPORTS_COMMAND ${{ inputs.YARN_EXPORTS_COMMAND }}
           echo YARN_TEST_COMMAND ${{ inputs.YARN_TEST_COMMAND }}
           echo USES_SONAR_CLOUD ${{ inputs.USES_SONAR_CLOUD }}
           echo USES_SONAR_CLOUD_MAIN_ANALYSIS ${{ inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS }}
@@ -84,7 +119,12 @@ jobs:
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
-          cache: 'yarn'      
+          cache: 'yarn' 
+          
+      - name: CDK Prefix
+        if: "${{ inputs.USES_INTEGRATION_EXPORTS == true }}"
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
   
       - name: yarn install && yarn build
         run: |
@@ -92,6 +132,18 @@ jobs:
           yarn build
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Deployer Role with OIDC Provider
+        if: "${{ inputs.USES_INTEGRATION_EXPORTS == true }}"
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+            role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+            aws-region: ${{ inputs.AWS_REGION }}
+      
+      - name: ${{ inputs.YARN_EXPORTS_COMMAND }}
+        if: "${{ inputs.USES_INTEGRATION_EXPORTS == true }}"
+        run: |
+          ${{ inputs.YARN_EXPORTS_COMMAND }}
 
       - name: ${{ inputs.YARN_TEST_COMMAND }}
         run: |
@@ -110,6 +162,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-
-
