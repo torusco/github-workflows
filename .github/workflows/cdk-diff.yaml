@@ -65,7 +65,7 @@ jobs:
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo YARN_DIFF_COMMAND ${{ inputs.YARN_DIFF_COMMAND }}
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with: 
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 

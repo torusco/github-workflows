@@ -115,8 +115,8 @@ jobs:
           echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref != ''
-        name: actions/checkout@v3 client payload ref
-        uses: actions/checkout@v3
+        name: actions/checkout@v4 client payload ref
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
           ref: ${{ github.event.client_payload.ref }}
@@ -129,8 +129,8 @@ jobs:
           echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref == ''
-        name: actions/checkout@v3 default ref
-        uses: actions/checkout@v3
+        name: actions/checkout@v4 default ref
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 

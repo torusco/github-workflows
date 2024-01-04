@@ -60,8 +60,8 @@ jobs:
           echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref != ''
-        name: actions/checkout@v3 client payload ref
-        uses: actions/checkout@v3
+        name: actions/checkout@v4 client payload ref
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.client_payload.ref }}
 
@@ -72,8 +72,8 @@ jobs:
           echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref == ''
-        name: actions/checkout@v3 default ref
-        uses: actions/checkout@v3
+        name: actions/checkout@v4 default ref
+        uses: actions/checkout@v4
 
       - uses: actions/setup-python@v4
         with:

@@ -95,7 +95,7 @@ jobs:
           echo USES_FIVETRAN ${{ inputs.USES_FIVETRAN }}
           echo USES_STRIPE ${{ inputs.USES_STRIPE }}
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v3
