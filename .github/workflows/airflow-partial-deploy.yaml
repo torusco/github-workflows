@@ -1,0 +1,283 @@
+name: "Airflow Partial Deploy v8"
+
+on:
+  workflow_call:
+    inputs:
+      AIRFLOW_ENVIRONMENT_NAME:
+        type: string
+        required: true
+
+      AWS_REGION:
+        type: string
+        required: true
+
+      CDK_PREFIX:
+        description: environment instance name is used to select the instance
+        type: string
+        required: true
+
+      ENVIRONMENT_LONG_NAME:
+        type: string
+        required: true
+
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
+      SLACK_CHANNEL_ID:
+        type: string
+        required: false
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: true
+
+      S3_BUCKET_NAME:
+        type: string
+        required: true
+
+    secrets:
+    
+      # required for using github package manager
+      NPM_TOKEN:
+        required: true
+
+env:
+  CHANGED_COUNT: 0
+  DELETED_COUNT: 0
+  GITHUB_RUN_URL_FOR_SLACK: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/ # default
+
+jobs:
+
+  airflow_partial_deploy:
+
+    runs-on: ${{ inputs.RUNS_ON }}
+
+    permissions: # github oidc
+      id-token: write
+      contents: read
+
+    steps:
+
+      - name: echo
+        run: |
+          echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
+          echo ENVIRONMENT_LONG_NAME ${{ inputs.ENVIRONMENT_LONG_NAME }}
+          echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo "CHANGED_COUNT=0" >> $GITHUB_ENV
+          echo "DELETED_COUNT=0" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref != ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use ${{ github.event.client_payload.ref }} not ${{ github.ref }}"
+          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref != ''
+        name: actions/checkout@v4 client payload ref
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+          ref: ${{ github.event.client_payload.ref }}
+
+      - if: github.event.client_payload.ref == ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use default ${{ github.ref }}"
+          echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref == ''
+        name: actions/checkout@v4 default ref
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
+
+      - name: Deployer Role with Github OIDC Provider
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+            role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
+            aws-region: ${{inputs.AWS_REGION}}
+  
+      - name: Slack Airflow Partial Deploy Start
+        id: slack
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          payload: |
+            {
+              "text" : ":large_yellow_circle: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: partial deploy started <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      # start REDSHIFT and INSTANCES
+
+      - name: List Redshift clusters
+        run: |
+          aws redshift describe-clusters --query 'Clusters[*].[ClusterIdentifier,ClusterStatus]' --output text --region ${{ inputs.AWS_REGION }}
+
+      - name: Resume Redshift ${{ inputs.CDK_PREFIX }} cluster
+        run: |
+          CLUSTER_ID=$(aws redshift describe-clusters --tag-keys Instance --tag-values ${{ inputs.CDK_PREFIX }} --tag-keys Stack --tag-values ${{ inputs.CDK_PREFIX }}-datainfra-v2-redshift --query 'Clusters[*].ClusterIdentifier' --output text --region ${{ inputs.AWS_REGION }})
+          echo "Redshift cluster id" $CLUSTER_ID
+
+          STATUS=`aws redshift describe-clusters --cluster-identifier $CLUSTER_ID --query 'Clusters[*].[ClusterStatus]' --output text  --region ${{ inputs.AWS_REGION }}`
+          if [[ $STATUS == "available" ]]
+          then
+            echo "Cluster" $CLUSTER_ID "is already available, no action."
+          elif [[ $STATUS == "pausing" ]]
+          then
+            echo "Cluster" $CLUSTER_ID "is pausing, failing!"
+            exit 1
+          elif [[ $STATUS == "resuming" ]]
+          then
+            echo "Cluster" $CLUSTER_ID "is resuming, no action!"
+          else
+            echo "Resuming Redshift Cluster" $CLUSTER_ID "status" $STATUS
+            aws redshift resume-cluster --cluster-identifier $CLUSTER_ID --query 'Clusters[*].[ClusterStatus]' --output text  --region ${{ inputs.AWS_REGION }}
+          fi
+        
+          # do we add a wait for it to resume here or just fire and forget?
+
+          STATUS=`aws redshift describe-clusters --cluster-identifier $CLUSTER_ID --query 'Clusters[*].[ClusterStatus]' --output text  --region ${{ inputs.AWS_REGION }}`
+          echo "STATUS:" $STATUS
+
+      - name: List EC2 ${{ inputs.CDK_PREFIX }} Instances
+        run: |
+          INSTANCE_IDS=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters "Name=tag-key,Values=Instance" "Name=tag-value,Values=${{ inputs.CDK_PREFIX }}" --output text --region ${{ env.AWS_REGION }})
+          aws ec2 describe-instances --instance-ids $INSTANCE_IDS --query 'Reservations[*].Instances[*].[InstanceId,State.Name,Tags[?Key==`Instance`]]' --output yaml --region ${{ inputs.AWS_REGION }}
+  
+      - name: Start EC2 ${{ inputs.CDK_PREFIX }} Instances
+        run: |
+
+          aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters "Name=tag-key,Values=Instance" "Name=tag-value,Values=${{ inputs.CDK_PREFIX }}" "Name=instance-state-name,Values=stopped" --output text --region ${{ env.AWS_REGION }} > instances.txt
+
+          if [ ! -s instances.txt ]; then
+            echo "No STOPPED instances found, nothing to do!"
+            exit 0
+          fi
+
+          INSTANCES=($(cat instances.txt))
+          echo "Start ${#INSTANCES[@]} instances"
+          for INSTANCE in "${INSTANCES[@]}"
+          do 
+            aws ec2 start-instances --instance-ids $INSTANCE  --region ${{ inputs.AWS_REGION }}
+          done
+
+          aws ec2 describe-instances --instance-ids $INSTANCE_IDS --query 'Reservations[*].Instances[*].[InstanceId,State.Name,Tags[?Key==`Instance`]]' --output yaml --region ${{ env.AWS_REGION }}
+
+      # end REDSHIFT and INSTANCES
+
+      - name: Get changed DAG files including models (if any)
+        uses: tj-actions/changed-files@v41
+        id: changed-dag-files
+        with:
+          since_last_remote_commit: false # experiment, get all changes?
+          files: dags/**/*.{py,yml,sql}
+          files_ignore: |
+            .github/**
+            requirements.txt
+            dags/dbt/profiles.yml
+
+      - name: List files to sync
+        run: |
+          for file in ${{ steps.changed-dag-files.outputs.all_changed_files }}; do
+            echo "$file will be synched"
+          done
+
+      - name: S3 Bucket Name
+        run: |
+          # before
+          echo "Before S3_BUCKET_NAME=" $S3_BUCKET_NAME
+
+          # list it 
+          aws s3api list-buckets --query 'Buckets[?starts_with(Name,`${{ inputs.S3_BUCKET_NAME }}`)].Name' --output text
+          S3_BUCKET_NAME=$(aws s3api list-buckets --query 'Buckets[?starts_with(Name,`${{ inputs.S3_BUCKET_NAME }}`)].Name' --output text)
+
+          # replace it
+          echo "After S3_BUCKET_NAME=" $S3_BUCKET_NAME
+          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> $GITHUB_ENV
+
+      - name: Deploy changed files
+        if: steps.changed-dag-files.outputs.any_changed == 'true'
+        run: |
+          echo "Changed and Modifed Files Count: ${{steps.changed-dag-files.outputs.all_changed_and_modified_files_count}}"
+          echo "CHANGED_COUNT=${{steps.changed-dag-files.outputs.all_changed_and_modified_files_count}}" >> $GITHUB_ENV
+
+          for file in ${{ steps.changed-dag-files.outputs.all_changed_files }}; do
+            dir=${file%/*}
+            echo "Directory path is: $dir"
+            
+            aws s3 cp ./$file s3://${{ inputs.S3_BUCKET_NAME }}/$dir/
+            echo "SUCCESS: $file has been deployed to S3."
+          done       
+      
+
+      - name: Get changed files (delete cleanup)
+        id: changed-files 
+        uses: tj-actions/changed-files@v41
+        
+      - name: List Deleted files
+        if: steps.changed-dag-files.outputs.any_deleted == 'true'
+        run: |
+          for file in ${{ steps.changed-files.outputs.deleted_files }}; do
+            echo "$file was deleted"
+          done
+      
+      - name: Deploy Deleted Files
+        if: steps.changed-dag-files.outputs.any_deleted == 'true'
+        run : |
+          echo "Deleted Files Count: ${{steps.changed-dag-files.outputs.deleted_files_count}}"
+          echo "DELETED_COUNT=${{steps.changed-dag-files.outputs.deleted_files_count}}" >> $GITHUB_ENV
+
+          for file in ${{ steps.changed-files.outputs.deleted_files }}; do
+            aws s3 rm s3://${{ inputs.S3_BUCKET_NAME }}/$file
+            echo "SUCCESS: $file has been deleted from S3."
+          done
+          
+      - name: Slack Airflow Partial Deploy Complete
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ steps.slack.outputs.ts }}
+          payload: |
+            {
+              "text" : ":check-passed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: Partial Deploy Success! Updated: ${{ env.CHANGED_COUNT }} Deleted: ${{ env.DELETED_COUNT }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Slack Airflow Partial Deploy Failure
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ steps.slack.outputs.ts }}
+          payload: |
+            {
+              "text" : ":check-failed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: Partial Deploy Failed! Updated: ${{ env.CHANGED_COUNT }} Deleted: ${{ env.DELETED_COUNT }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Slack Airflow Partial Deploy Cancelled
+        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          update-ts: ${{ steps.slack.outputs.ts }}
+          payload: |
+            {
+              "text" : ":heavy_multiplication_x: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.Airflow Partial Deploy_PREFIX }} :${{ github.actor }}: Partial Deploy Cancelled! <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
