@@ -277,7 +277,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":heavy_multiplication_x: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.Airflow Partial Deploy_PREFIX }} :${{ github.actor }}: Partial Deploy Cancelled! <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":heavy_multiplication_x: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: Partial Deploy Cancelled! <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
