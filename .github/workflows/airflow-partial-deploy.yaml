@@ -197,7 +197,7 @@ jobs:
         id: bucket_name
         run: |
           # before
-          echo "Before S3_BUCKET_NAME=" $S3_BUCKET_NAME
+          echo "Before S3_BUCKET_NAME=" ${{ inputs.S3_BUCKET_NAME }}
 
           # list it 
           aws s3api list-buckets --query 'Buckets[?starts_with(Name,`${{ inputs.S3_BUCKET_NAME }}`)].Name' --output text
