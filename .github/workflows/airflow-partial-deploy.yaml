@@ -152,13 +152,13 @@ jobs:
 
       - name: List EC2 ${{ inputs.CDK_PREFIX }} Instances
         run: |
-          INSTANCE_IDS=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters "Name=tag-key,Values=Instance" "Name=tag-value,Values=${{ inputs.CDK_PREFIX }}" --output text --region ${{ env.AWS_REGION }})
+          INSTANCE_IDS=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters "Name=tag-key,Values=Instance" "Name=tag-value,Values=${{ inputs.CDK_PREFIX }}" --output text --region ${{ inputs.AWS_REGION }})
           aws ec2 describe-instances --instance-ids $INSTANCE_IDS --query 'Reservations[*].Instances[*].[InstanceId,State.Name,Tags[?Key==`Instance`]]' --output yaml --region ${{ inputs.AWS_REGION }}
   
       - name: Start EC2 ${{ inputs.CDK_PREFIX }} Instances
         run: |
 
-          aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters "Name=tag-key,Values=Instance" "Name=tag-value,Values=${{ inputs.CDK_PREFIX }}" "Name=instance-state-name,Values=stopped" --output text --region ${{ env.AWS_REGION }} > instances.txt
+          aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters "Name=tag-key,Values=Instance" "Name=tag-value,Values=${{ inputs.CDK_PREFIX }}" "Name=instance-state-name,Values=stopped" --output text --region ${{ inputs.AWS_REGION }} > instances.txt
 
           if [ ! -s instances.txt ]; then
             echo "No STOPPED instances found, nothing to do!"
@@ -172,7 +172,7 @@ jobs:
             aws ec2 start-instances --instance-ids $INSTANCE  --region ${{ inputs.AWS_REGION }}
           done
 
-          aws ec2 describe-instances --instance-ids $INSTANCE_IDS --query 'Reservations[*].Instances[*].[InstanceId,State.Name,Tags[?Key==`Instance`]]' --output yaml --region ${{ env.AWS_REGION }}
+          aws ec2 describe-instances --instance-ids $INSTANCE_IDS --query 'Reservations[*].Instances[*].[InstanceId,State.Name,Tags[?Key==`Instance`]]' --output yaml --region ${{ inputs.AWS_REGION }}
 
       # end REDSHIFT and INSTANCES
 
@@ -193,7 +193,8 @@ jobs:
             echo "$file will be synched"
           done
 
-      - name: S3 Bucket Name
+      - name: Get Updated S3 Bucket Name
+        id: bucket_name
         run: |
           # before
           echo "Before S3_BUCKET_NAME=" $S3_BUCKET_NAME
@@ -204,7 +205,7 @@ jobs:
 
           # replace it
           echo "After S3_BUCKET_NAME=" $S3_BUCKET_NAME
-          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> $GITHUB_ENV
+          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> $GITHUB_OUTPUT
 
       - name: Deploy changed files
         if: steps.changed-dag-files.outputs.any_changed == 'true'
@@ -216,11 +217,10 @@ jobs:
             dir=${file%/*}
             echo "Directory path is: $dir"
             
-            aws s3 cp ./$file s3://${{ inputs.S3_BUCKET_NAME }}/$dir/
+            aws s3 cp ./$file s3://${{ steps.bucket_name.outputs.S3_BUCKET_NAME }}/$dir/
             echo "SUCCESS: $file has been deployed to S3."
           done       
       
-
       - name: Get changed files (delete cleanup)
         id: changed-files 
         uses: tj-actions/changed-files@v41
