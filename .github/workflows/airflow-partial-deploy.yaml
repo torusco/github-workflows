@@ -239,7 +239,7 @@ jobs:
           echo "DELETED_COUNT=${{steps.changed-dag-files.outputs.deleted_files_count}}" >> $GITHUB_ENV
 
           for file in ${{ steps.changed-files.outputs.deleted_files }}; do
-            aws s3 rm s3://${{ inputs.S3_BUCKET_NAME }}/$file
+            aws s3 rm s3://${{ steps.bucket_name.outputs.S3_BUCKET_NAME }}/$file
             echo "SUCCESS: $file has been deleted from S3."
           done
           
