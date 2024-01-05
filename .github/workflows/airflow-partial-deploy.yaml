@@ -39,6 +39,10 @@ on:
 
     secrets:
     
+      # only required if using slack provider
+      SLACK_BOT_TOKEN:
+        required: false
+
       # required for using github package manager
       NPM_TOKEN:
         required: true
