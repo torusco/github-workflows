@@ -52,7 +52,7 @@ jobs:
     steps:
 
       - name: Checkout USES_SONAR_CLOUD and USES_SONAR_CLOUD_MAIN_ANALYSIS
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: "${{ inputs.USES_SONAR_CLOUD == true && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == true }}"
         with: 
           fetch-depth: 0     # sonar cloud - Number of commits to fetch. 0 indicates all history for all branches and tags.
@@ -60,7 +60,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: Checkout USES_SONAR_CLOUD and not USES_SONAR_CLOUD_MAIN_ANALYSIS
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: "${{ inputs.USES_SONAR_CLOUD == true && inputs.USES_SONAR_CLOUD_MAIN_ANALYSIS == false }}"
         with: 
           fetch-depth: 0     # sonar cloud - Number of commits to fetch. 0 indicates all history for all branches and tags.
@@ -68,16 +68,16 @@ jobs:
           # will take ref from the event (PR branch)
 
       - name: Checkout not USES_SONAR_CLOUD
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: "${{ inputs.USES_SONAR_CLOUD == false }}"
         # clean regular checkout, no sonar cloud, no refs
         with: 
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: use github as yarn registry
-        uses: actions/setup-node@v3 # Found that this action uses deprecated set-output command, filed bug with developers: https://github.com/actions/setup-node/issues/606
+        uses: actions/setup-node@v4 # Found that this action uses deprecated set-output command, filed bug with developers: https://github.com/actions/setup-node/issues/606
         with:
-          node-version: '20'
+          node-version: '20.x'
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
