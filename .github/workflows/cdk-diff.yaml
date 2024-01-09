@@ -23,7 +23,7 @@ on:
       NODE_VERSION:
         type: string
         required: false
-        default: '20'
+        default: '20.x'
   
       RUNS_ON:
         type: string
@@ -70,7 +70,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: use github as yarn registry
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{inputs.NODE_VERSION}}
           registry-url: 'https://npm.pkg.github.com/'
