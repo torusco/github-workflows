@@ -38,6 +38,8 @@ jobs:
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+          echo ${{ github.actor }}
+          echo ${{ github.triggering_actor }}
 
       - if: github.event.client_payload.ref != ''
         name: GITHUB_CHECKOUT_REF
