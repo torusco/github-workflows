@@ -42,7 +42,7 @@ runs:
         ref: ${{ github.head_ref }}
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       id: setup_py
       with:
         python-version: ${{ inputs.python_version }}

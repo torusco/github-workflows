@@ -194,7 +194,7 @@ jobs:
       - name: Slack Airflow Partial Deploy Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
@@ -273,7 +273,7 @@ jobs:
           
       - name: Slack Airflow Partial Deploy Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -286,7 +286,7 @@ jobs:
 
       - name: Slack Airflow Partial Deploy Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -299,7 +299,7 @@ jobs:
 
       - name: Slack Airflow Partial Deploy Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}

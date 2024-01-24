@@ -59,7 +59,7 @@ jobs:
 
       - name: Slack Message
         id: slack
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
@@ -99,7 +99,7 @@ jobs:
           fi
 
       - name: Approved
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ env.TS}}
@@ -113,7 +113,7 @@ jobs:
 
       - name: Cancelled
         if: "${{ cancelled() }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ env.TS}}

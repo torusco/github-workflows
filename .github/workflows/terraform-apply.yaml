@@ -173,7 +173,7 @@ jobs:
         uses: actions/checkout@v4
 
       - if: inputs.PY_VERSION != ''
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{inputs.PY_VERSION}}    
 
@@ -229,7 +229,7 @@ jobs:
       - name: Slack Terraform Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
@@ -261,7 +261,7 @@ jobs:
 
       - name: Slack Terraform Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -274,7 +274,7 @@ jobs:
 
       - name: Slack Terraform Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -287,7 +287,7 @@ jobs:
 
       - name: Slack Terraform Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
