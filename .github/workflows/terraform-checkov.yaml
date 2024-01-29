@@ -29,9 +29,8 @@ on:
       TERRAFORM_VERSION:
         type: string
         required: false
-        default: "1.6.6"
+        default: "1.7.1"
   
-
     secrets:
       # required for using github package manager
       NPM_TOKEN:

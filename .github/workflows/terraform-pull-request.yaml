@@ -36,7 +36,7 @@ on:
       TERRAFORM_VERSION:
         type: string
         required: false
-        default: "1.6.6"
+        default: "1.7.1"
   
       USES_CLOUDFLARE:
         type: boolean
