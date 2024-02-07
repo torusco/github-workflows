@@ -46,7 +46,12 @@ on:
       TERRAFORM_RESOURCE_TO_REPLACE:
         type: string
         required: false
-        description: "fully qualified resource name to force replace, if needed, after normal terraform run"
+        description: "legacy, fully qualified resource name to force replace, if needed, after normal terraform run"
+
+      TERRAFORM_RESOURCES_TO_REPLACE:
+        type: string
+        required: false
+        description: "supports multiple resource replacements, ex: -replace=name -replace=name"
 
       TERRAFORM_VAR_FILE:
         type: string
@@ -285,6 +290,7 @@ jobs:
           terraform plan -var-file=${{ inputs.TERRAFORM_VAR_FILE }} -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
 
+      # legacy for device iot
       - name: Terraform Resource Plan and Apply
         if: "${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE != '' }}"
         run: |
@@ -292,6 +298,16 @@ jobs:
           terraform plan -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} -var-file=${{ inputs.TERRAFORM_VAR_FILE }} -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
           terraform apply -replace=${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }} ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
 
+      # new multi replace for data infra postman
+      # pass -replace=name -replace=name to replace multiple
+      # don't need it on apply
+      - name: Terraform Resources Plan and Apply
+        if: "${{ inputs.TERRAFORM_RESOURCES_TO_REPLACE != '' }}"
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          terraform plan ${{ inputs.TERRAFORM_RESOURCES_TO_REPLACE }} -var-file=${{ inputs.TERRAFORM_VAR_FILE }} -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
+          terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
+  
       - name: Slack Terraform Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.24.0
