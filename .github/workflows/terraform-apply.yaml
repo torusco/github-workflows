@@ -244,7 +244,7 @@ jobs:
           echo "OKTA_API_TOKEN=${{ secrets.OKTA_API_TOKEN }}" >> $GITHUB_ENV
 
       - name: Postman Variables Single Team
-        if: "${{ inputs.USES_POSTMAN_SINGLE != '' }}"
+        if: "${{ inputs.USES_POSTMAN != '' }}"
         run: |
           echo "POSTMAN_API_KEY=${{ secrets.POSTMAN_API_KEY }}" >> $GITHUB_ENV
   
