@@ -68,6 +68,16 @@ on:
         required: false
         default: "1.7.1"
 
+      TF_VAR_SOURCE_CDK_PREFIX:
+        type: string
+        required: false
+        description: "set TF_VAR_SOURCE_CDK_PREFIX to this value if passed"
+
+      TF_VAR_TARGET_CDK_PREFIX:
+        type: string
+        required: false
+        description: "set TF_VAR_TARGET_CDK_PREFIX to this value if passed"
+  
       USES_CLOUDFLARE:
         type: boolean
         required: false
@@ -172,6 +182,8 @@ jobs:
           echo TERRAFORM_VAR_FILE ${{ inputs.TERRAFORM_VAR_FILE }}
           echo TERRAFORM_WORKSPACE ${{ inputs.TERRAFORM_WORKSPACE }}
           echo TERRAFORM_VERSION ${{ inputs.TERRAFORM_VERSION }}
+          echo TF_VAR_SOURCE_CDK_PREFIX ${{ inputs.TF_VAR_SOURCE_CDK_PREFIX }}
+          echo TF_VAR_TARGET_CDK_PREFIX ${{ inputs.TF_VAR_TARGET_CDK_PREFIX }}
           echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
           echo USES_DATADOG ${{ inputs.USES_DATADOG }}
           echo USES_FIVETRAN ${{ inputs.USES_FIVETRAN }}
@@ -240,6 +252,16 @@ jobs:
           echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
           echo "TF_VAR_TORUS_ENVIRONMENT=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
+      - name: Environment Variables TF_VAR_SOURCE_CDK_PREFIX
+        if: "${{ inputs.TF_VAR_SOURCE_CDK_PREFIX != '' }}"
+        run: |
+          echo "TF_VAR_SOURCE_CDK_PREFIX=${{ inputs.TF_VAR_SOURCE_CDK_PREFIX }}" >> $GITHUB_ENV
+  
+      - name: Environment Variables TF_VAR_TARGET_CDK_PREFIX
+        if: "${{ inputs.TF_VAR_TARGET_CDK_PREFIX != '' }}"
+        run: |
+          echo "TF_VAR_TARGET_CDK_PREFIX=${{ inputs.TF_VAR_TARGET_CDK_PREFIX }}" >> $GITHUB_ENV
+    
       - name: CloudFlare Variables
         if: "${{ inputs.USES_CLOUDFLARE != '' }}"
         run: |
