@@ -58,6 +58,11 @@ on:
         required: true
         description: "most var files are just -var-file=./<env long name>/.tfvars but some use instance specific variables such as -var-file=./<env long name>/<cdk prefix>.tfvars"
 
+      TERRAFORM_WORKSPACE:
+        type: string
+        required: false
+        description: "override the use of $CDK_PREFIX to init and workspace"
+  
       TERRAFORM_VERSION:
         type: string
         required: false
@@ -165,6 +170,7 @@ jobs:
           echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           echo TERRAFORM_RESOURCE_TO_REPLACE ${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }}
           echo TERRAFORM_VAR_FILE ${{ inputs.TERRAFORM_VAR_FILE }}
+          echo TERRAFORM_WORKSPACE ${{ inputs.TERRAFORM_WORKSPACE }}
           echo TERRAFORM_VERSION ${{ inputs.TERRAFORM_VERSION }}
           echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
           echo USES_DATADOG ${{ inputs.USES_DATADOG }}
@@ -221,6 +227,14 @@ jobs:
             aws-region: ${{inputs.AWS_REGION}}
 
       - name: Environment Variables
+        if: "${{ inputs.TERRAFORM_WORKSPACE == '' }}"
+        run: |
+          echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TF_VAR_TORUS_ENVIRONMENT=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
+
+      - name: Environment Variables Workspace
+        if: "${{ inputs.TERRAFORM_WORKSPACE != '' }}"
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
           echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
@@ -278,11 +292,20 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Terraform Init
+        if: "${{ inputs.TERRAFORM_WORKSPACE == '' }}"
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform --version
           terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$CDK_PREFIX.tf -reconfigure
           terraform workspace select -or-create $CDK_PREFIX 
+
+      - name: Terraform Init Workspace
+        if: "${{ inputs.TERRAFORM_WORKSPACE != '' }}"
+        run: |
+          cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
+          terraform --version
+          terraform init -input=false -backend-config=./${{ env.TF_VAR_TORUS_ENVIRONMENT }}/$TERRAFORM_WORKSPACE.tf -reconfigure
+          terraform workspace select -or-create $TERRAFORM_WORKSPACE 
 
       - name: Terraform Plan and Apply
         run: |
