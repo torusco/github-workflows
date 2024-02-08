@@ -242,6 +242,7 @@ jobs:
         if: "${{ inputs.TERRAFORM_WORKSPACE == '' }}"
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TERRAFORM_WORKSPACE=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
           echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
           echo "TF_VAR_TORUS_ENVIRONMENT=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
@@ -249,6 +250,7 @@ jobs:
         if: "${{ inputs.TERRAFORM_WORKSPACE != '' }}"
         run: |
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
+          echo "TERRAFORM_WORKSPACE=${{ inputs.TERRAFORM_WORKSPACE }}" >> $GITHUB_ENV
           echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
           echo "TF_VAR_TORUS_ENVIRONMENT=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
