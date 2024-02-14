@@ -93,6 +93,11 @@ on:
         required: false
         default: false
 
+      USES_GITHUB:
+        type: boolean
+        required: false
+        default: false
+  
       USES_OKTA:
         type: boolean
         required: false
@@ -132,6 +137,10 @@ on:
 
       # only required if using fivetran provider
       FIVETRAN_APISECRET: 
+        required: false
+
+      # only required if using github provider
+      GITHUB_MANAGED_RESOURCES_TOKEN:
         required: false
 
       # only required if using okta provider
@@ -281,6 +290,11 @@ jobs:
           echo "FIVETRAN_APIKEY=${{ secrets.FIVETRAN_APIKEY }}" >> $GITHUB_ENV
           echo "FIVETRAN_APISECRET=${{ secrets.FIVETRAN_APISECRET }}" >> $GITHUB_ENV
 
+      - name: Github Variables
+        if: "${{ inputs.USES_GITHUB != '' }}"
+        run: |
+          echo "TF_VAR_GITHUB_MANAGED_RESOURCES_TOKEN=${{ secrets.GITHUB_MANAGED_RESOURCES_TOKEN }}" >> $GITHUB_ENV
+  
       - name: Okta Variables
         if: "${{ inputs.USES_OKTA != '' }}"
         run: |
