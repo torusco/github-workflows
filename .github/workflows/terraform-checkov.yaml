@@ -29,7 +29,7 @@ on:
       TERRAFORM_VERSION:
         type: string
         required: false
-        default: "1.7.1"
+        default: "1.7.3"
   
     secrets:
       # required for using github package manager
