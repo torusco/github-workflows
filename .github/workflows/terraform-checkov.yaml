@@ -15,7 +15,7 @@ on:
         description: "the python version to install, ex 3.10 or 3.11"
         type: string
         required: false
-        default: "3.11"
+        default: "3.12"
   
       RUNS_ON:
         type: string
