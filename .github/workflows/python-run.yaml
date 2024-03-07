@@ -228,7 +228,7 @@ jobs:
   
       - name: Slack PY Start
         id: slack
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' }} && ${{ inputs.SLACK_NOTIFY_ON_FAILURE_ONLY == true }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }} && ${{ inputs.SLACK_NOTIFY_ON_FAILURE_ONLY == 'true' }}"
         uses: slackapi/slack-github-action@v1.25.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
@@ -245,7 +245,7 @@ jobs:
           ${{ inputs.PY_RUN_COMMAND }}
           
       - name: Slack PY Complete
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' }} && ${{ inputs.SLACK_NOTIFY_ON_FAILURE_ONLY == true }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }} && ${{ inputs.SLACK_NOTIFY_ON_FAILURE_ONLY == 'true' }}"
         uses: slackapi/slack-github-action@v1.25.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
