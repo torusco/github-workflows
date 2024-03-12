@@ -49,6 +49,10 @@ on:
         type: string
         required: true
 
+      UPLOAD_ARTIFACTS:
+        type: string
+        required: false
+
       # put uses flags at end
       USES_CLOUDFLARE:
         type: boolean
@@ -244,6 +248,12 @@ jobs:
           cd ${{ inputs.PY_FOLDER_NAME }}
           ${{ inputs.PY_RUN_COMMAND }}
           
+      - name: Upload Artifacts
+        if: "${{ inputs.UPLOAD_ARTIFACTS != ''}}"
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ inputs.UPLOAD_ARTIFACTS}}
+
       - name: Slack PY Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_NOTIFY_ON_FAILURE_ONLY == 'true' }}"
         uses: slackapi/slack-github-action@v1.25.0
