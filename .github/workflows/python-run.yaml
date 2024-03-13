@@ -115,6 +115,16 @@ on:
       METABASE_PASS: 
         required: false
 
+      # only required if using postman provider single
+      POSTMAN_API_KEY: 
+        required: false
+
+      # only required if using postman provider dual app and data
+      POSTMAN_API_KEY_APP: 
+        required: false
+      POSTMAN_API_KEY_DATA: 
+        required: false
+  
       # only required if using stripe provider
       STRIPE_API_KEY: 
         required: false
