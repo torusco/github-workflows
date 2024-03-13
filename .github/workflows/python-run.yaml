@@ -79,6 +79,16 @@ on:
         required: false
         default: false
     
+      USES_POSTMAN:
+        type: boolean
+        required: false
+        default: false
+  
+      USES_POSTMAN_APP_AND_DATA:
+        type: boolean
+        required: false
+        default: false
+
       USES_STRIPE:
         type: boolean
         required: false
@@ -146,6 +156,8 @@ jobs:
           echo USES_METABASE ${{ inputs.USES_METABASE }}
           echo USES_PIP ${{ inputs.USES_PIP }}
           echo USES_POETRY ${{ inputs.USES_POETRY }}
+          echo USES_POSTMAN ${{ inputs.USES_POSTMAN }}
+          echo USES_POSTMAN_APP_AND_DATA ${{ inputs.USES_POSTMAN_APP_AND_DATA }}
           echo USES_STRIPE ${{ inputs.USES_STRIPE }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
 
@@ -225,11 +237,23 @@ jobs:
           echo "METABASE_USER=${{ secrets.METABASE_USER }}" >> $GITHUB_ENV
           echo "METABASE_PASS=${{ secrets.METABASE_PASS }}" >> $GITHUB_ENV
 
+      - name: Postman Variables Single Team
+        if: "${{ inputs.USES_POSTMAN != '' }}"
+        run: |
+          echo "POSTMAN_API_KEY=${{ secrets.POSTMAN_API_KEY }}" >> $GITHUB_ENV
+  
+      - name: Postman Variables Both App and Data Team
+        if: "${{ inputs.USES_POSTMAN_APP_AND_DATA != '' }}"
+        run: |
+          echo "TF_VAR_POSTMAN_API_KEY_APP=${{ secrets.POSTMAN_API_KEY_APP }}" >> $GITHUB_ENV
+          echo "TF_VAR_POSTMAN_API_KEY_DATA=${{ secrets.POSTMAN_API_KEY_DATA }}" >> $GITHUB_ENV
+  
       - name: Stripe Variables
         if: "${{ inputs.USES_STRIPE != '' }}"
         run: |
           echo "STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}" >> $GITHUB_ENV
   
+          
       - name: Slack PY Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_NOTIFY_ON_FAILURE_ONLY == 'true' }}"
