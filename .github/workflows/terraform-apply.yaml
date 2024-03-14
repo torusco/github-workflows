@@ -358,6 +358,7 @@ jobs:
           terraform workspace select -or-create $TERRAFORM_WORKSPACE 
 
       - name: Terraform Plan and Apply
+        if: "${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE == '' && inputs.TERRAFORM_RESOURCES_TO_REPLACE == '' }}"
         run: |
           cd ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           terraform plan -var-file=${{ inputs.TERRAFORM_VAR_FILE }} -out=${{ inputs.ENVIRONMENT_LONG_NAME }}.out
