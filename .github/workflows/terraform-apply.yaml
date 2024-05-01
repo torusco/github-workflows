@@ -88,6 +88,11 @@ on:
         required: false
         default: false
 
+      USES_AUTH0:
+        type: boolean
+        required: false
+        default: false
+
       USES_DATADOG:
         type: boolean
         required: false
@@ -128,6 +133,18 @@ on:
       CLOUDFLARE_API_TOKEN: 
         required: false
 
+      # only required if using auth0 provider
+      AUTH0_DOMAIN:
+        required: false
+
+      # only required if using auth0 provider
+      AUTH0_CLIENT_ID:
+        required: false
+
+      # only required if using auth0 provider
+      AUTH0_CLIENT_SECRET:
+        required: false
+
       # only required if using datadog provider
       DD_API_KEY: 
         required: false
@@ -159,6 +176,7 @@ on:
       # only required if using postman provider dual app and data
       POSTMAN_API_KEY_APP: 
         required: false
+
       POSTMAN_API_KEY_DATA: 
         required: false
   
@@ -201,6 +219,7 @@ jobs:
           echo TF_VAR_SOURCE_CDK_PREFIX ${{ inputs.TF_VAR_SOURCE_CDK_PREFIX }}
           echo TF_VAR_TARGET_CDK_PREFIX ${{ inputs.TF_VAR_TARGET_CDK_PREFIX }}
           echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
+          echo USES_AUTH0 ${{ inputs.USES_AUTH0 }}
           echo USES_DATADOG ${{ inputs.USES_DATADOG }}
           echo USES_FIVETRAN ${{ inputs.USES_FIVETRAN }}
           echo USES_OKTA ${{ inputs.USES_OKTA }}
@@ -289,6 +308,13 @@ jobs:
         if: "${{ inputs.USES_CLOUDFLARE != '' }}"
         run: |
           echo "CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Auth0 Variables
+        if: "${{ inputs.USES_AUTH0 != '' }}"
+        run: |
+          echo "TF_VAR_auth0_domain=${{ secrets.AUTH0_DOMAIN }}" >> $GITHUB_ENV
+          echo "TF_VAR_auth0_client_id=${{ secrets.AUTH0_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "TF_VAR_auth0_client_secret=${{ secrets.AUTH0_CLIENT_SECRET }}" >> $GITHUB_ENV
 
       - name: Datadog Variables
         if: "${{ inputs.USES_DATADOG != '' }}"
