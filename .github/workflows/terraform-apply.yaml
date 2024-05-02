@@ -312,6 +312,9 @@ jobs:
       - name: Auth0 Variables
         if: "${{ inputs.USES_AUTH0 != '' }}"
         run: |
+          echo "AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}" >> $GITHUB_ENV
+          echo "AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }}" >> $GITHUB_ENV
           echo "TF_VAR_auth0_domain=${{ secrets.AUTH0_DOMAIN }}" >> $GITHUB_ENV
           echo "TF_VAR_auth0_client_id=${{ secrets.AUTH0_CLIENT_ID }}" >> $GITHUB_ENV
           echo "TF_VAR_auth0_client_secret=${{ secrets.AUTH0_CLIENT_SECRET }}" >> $GITHUB_ENV
