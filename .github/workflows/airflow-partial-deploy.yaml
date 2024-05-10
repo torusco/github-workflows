@@ -221,19 +221,29 @@ jobs:
             echo "$file will be synched"
           done
 
-      - name: Get Updated S3 Bucket Name
+
+      - name: S3 Bucket Name 
         id: bucket_name
         run: |
-          # before
-          echo "Before S3_BUCKET_NAME=" ${{ inputs.S3_BUCKET_NAME }}
-
-          # list it 
-          aws s3api list-buckets --query 'Buckets[?starts_with(Name,`${{ inputs.S3_BUCKET_NAME }}`)].Name' --output text
-          S3_BUCKET_NAME=$(aws s3api list-buckets --query 'Buckets[?starts_with(Name,`${{ inputs.S3_BUCKET_NAME }}`)].Name' --output text)
-
-          # replace it
-          echo "After S3_BUCKET_NAME=" $S3_BUCKET_NAME
+          # todo param SSM_BUCKET_PARAMETER_NAME
+          SSM_BUCKET_PARAMETER_NAME=/${{ inputs.CDK_PREFIX }}-datainfra-v2/airflow/workflowsBucketName
+          S3_BUCKET_NAME=$(aws ssm get-parameter --name $SSM_BUCKET_PARAMETER_NAME --query Parameter.Value --output text)
           echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "S3_BUCKET_NAME=$S3_BUCKET_NAME"
+
+      # - name: Get Updated S3 Bucket Name
+      #   id: bucket_name
+      #   run: |
+      #     # before
+      #     echo "Before S3_BUCKET_NAME=" ${{ inputs.S3_BUCKET_NAME }}
+
+      #     # list it FUCK
+      #     aws s3api list-buckets --query 'Buckets[?starts_with(Name,`${{ inputs.S3_BUCKET_NAME }}`)].Name' --output text
+      #     S3_BUCKET_NAME=$(aws s3api list-buckets --query 'Buckets[?starts_with(Name,`${{ inputs.S3_BUCKET_NAME }}`)].Name' --output text)
+
+      #     # replace it
+      #     echo "After S3_BUCKET_NAME=" $S3_BUCKET_NAME
+      #     echo "S3_BUCKET_NAME=$S3_BUCKET_NAME" >> $GITHUB_OUTPUT
 
       - name: Deploy changed files
         if: steps.changed-dag-files.outputs.any_changed == 'true'
@@ -243,10 +253,10 @@ jobs:
 
           for file in ${{ steps.changed-dag-files.outputs.all_changed_files }}; do
             dir=${file%/*}
-            echo "Directory path is: $dir"
+            echo "Directory path is: $dir $file"
             
             aws s3 cp ./$file s3://${{ steps.bucket_name.outputs.S3_BUCKET_NAME }}/$dir/
-            echo "SUCCESS: $file has been deployed to S3."
+            echo "SUCCESS: $dir $file has been deployed to S3."
           done       
       
       - name: Get changed files (delete cleanup)
