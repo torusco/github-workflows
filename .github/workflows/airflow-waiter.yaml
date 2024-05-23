@@ -113,6 +113,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Waiter Check Airflow is Ready
+        continue-on-error: true
         run: |
           STATUS=$(aws mwaa get-environment --name ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} --query 'Environment.Status' --out text)
 
