@@ -116,16 +116,24 @@ jobs:
         run: |
           STATUS=$(aws mwaa get-environment --name ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} --query 'Environment.Status' --out text)
 
-          WAITED=0
-          WAIT_TIME=5
+          if [[ $? -eq 254 ]]; then
+            echo "Airflow not found, continuing..."
+            
+          else
+            echo "Airflow found, waiting..."
 
-          while [[ $STATUS == "UPDATING" ]]
-          do
-            STATUS=$(aws mwaa get-environment --name ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} --query 'Environment.Status' --out text)
-            echo "Waiting for Airflow ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} to finish UPDATING for $WAITED seconds"
-            WAITED=$((WAITED + WAIT_TIME))
-            sleep $WAIT_TIME
-          done
+            WAITED=0
+            WAIT_TIME=5
+
+            while [[ $STATUS == "UPDATING" ]]
+            do
+              STATUS=$(aws mwaa get-environment --name ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} --query 'Environment.Status' --out text)
+              echo "Waiting for Airflow ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} to finish UPDATING for $WAITED seconds"
+              WAITED=$((WAITED + WAIT_TIME))
+              sleep $WAIT_TIME
+            done
+          
+            fi
           
       - name: Slack CDK Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
