@@ -116,25 +116,18 @@ jobs:
         continue-on-error: true
         run: |
           STATUS=$(aws mwaa get-environment --name ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} --query 'Environment.Status' --out text)
+          # if airflow not found, it errors with 254, continue-on-error says this is ok, proceed
 
-          if [[ $? -eq 254 ]]; then
-            echo "Airflow not found, continuing..."
-            
-          else
-            echo "Airflow found, waiting..."
+          WAITED=0
+          WAIT_TIME=5
 
-            WAITED=0
-            WAIT_TIME=5
-
-            while [[ $STATUS == "UPDATING" ]]
-            do
-              STATUS=$(aws mwaa get-environment --name ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} --query 'Environment.Status' --out text)
-              echo "Waiting for Airflow ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} to finish UPDATING for $WAITED seconds"
-              WAITED=$((WAITED + WAIT_TIME))
-              sleep $WAIT_TIME
-            done
-          
-            fi
+          while [[ $STATUS == "UPDATING" ]]
+          do
+            STATUS=$(aws mwaa get-environment --name ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} --query 'Environment.Status' --out text)
+            echo "Waiting for Airflow ${{ inputs.AIRFLOW_ENVIRONMENT_NAME}} to finish UPDATING for $WAITED seconds"
+            WAITED=$((WAITED + WAIT_TIME))
+            sleep $WAIT_TIME
+          done
           
       - name: Slack CDK Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
