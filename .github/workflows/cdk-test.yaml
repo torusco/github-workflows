@@ -116,7 +116,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{inputs.NODE_VERSION}}
-          cache: 'yarn'
 
       - name: setup yarn and github registry
         run: |
