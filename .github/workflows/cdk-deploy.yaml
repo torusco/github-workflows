@@ -107,6 +107,7 @@ jobs:
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo YARN_VERSION ${{ inputs.YARN_VERSION }}
           echo YARN_DEPLOY_COMMAND ${{ inputs.YARN_DEPLOY_COMMAND }}
           echo YARN_FOLDER_NAME ${{ inputs.YARN_FOLDER_NAME }}
           echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}

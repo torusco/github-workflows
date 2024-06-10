@@ -90,6 +90,7 @@ jobs:
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo YARN_VERSION ${{ inputs.YARN_VERSION }}
           echo YARN_EXPORTS_COMMAND ${{ inputs.YARN_EXPORTS_COMMAND }}
           echo YARN_TEST_COMMAND ${{ inputs.YARN_TEST_COMMAND }}
           echo USES_SONAR_CLOUD ${{ inputs.USES_SONAR_CLOUD }}

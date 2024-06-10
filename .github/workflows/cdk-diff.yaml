@@ -69,6 +69,7 @@ jobs:
           echo NODE_VERSION ${{ inputs.NODE_VERSION }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo YARN_VERSION ${{ inputs.YARN_VERSION }}
           echo YARN_DIFF_COMMAND ${{ inputs.YARN_DIFF_COMMAND }}
 
       - uses: actions/checkout@v4
