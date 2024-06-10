@@ -10,7 +10,7 @@
 
 # v9
 
-* Convert to using modern version of yarn
+* Support modern version of yarn using corepack
 
 # v8
 
