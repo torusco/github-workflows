@@ -28,7 +28,7 @@ on:
       YARN_VERSION:
         type: string
         required: false
-        default: "4.2.2"
+        default: "4.3.0"
         description: "version of yarn, ex: classic, latest, stable, 4.x.x"
 
       RUNS_ON:

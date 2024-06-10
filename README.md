@@ -11,7 +11,7 @@
 # v?
 
 * Allow specifying yarn version
-* YARN_VERSION default is 4.2.2, is not required, and can be overridden
+* YARN_VERSION default is 4.3.0, is not required, and can be overridden
 
 # v8
 
