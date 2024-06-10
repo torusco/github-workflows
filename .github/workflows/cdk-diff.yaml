@@ -73,6 +73,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{inputs.NODE_VERSION}}
+          registry-url: 'https://npm.pkg.github.com/'
+          always-auth: true
+          scope: '@torusco'
 
       - name: setup yarn and github registry
         run: |
