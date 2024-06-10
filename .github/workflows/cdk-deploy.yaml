@@ -41,12 +41,6 @@ on:
         type: string
         required: true
 
-      YARN_VERSION:
-        type: string
-        required: false
-        default: "4.3.0"
-        description: "version of yarn, ex: classic, latest, stable, 4.x.x"
-
       YARN_DEPLOY_COMMAND:
         type: string
         required: true
@@ -107,7 +101,6 @@ jobs:
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
-          echo YARN_VERSION ${{ inputs.YARN_VERSION }}
           echo YARN_DEPLOY_COMMAND ${{ inputs.YARN_DEPLOY_COMMAND }}
           echo YARN_FOLDER_NAME ${{ inputs.YARN_FOLDER_NAME }}
           echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
@@ -150,7 +143,6 @@ jobs:
       - name: setup yarn and github registry
         run: |
           corepack enable
-          yarn set version ${{ inputs.YARN_VERSION }}
           yarn config set npmScopes.torusco.npmRegistryServer "https://npm.pkg.github.com"
           yarn config set npmScopes.torusco.npmAlwaysAuth true
           yarn config set npmScopes.torusco.npmAuthToken $NPM_AUTH_TOKEN

@@ -8,10 +8,9 @@
 * branches are named: v6, v7.1, v8, etc and they are not deleted when PRs are merged
 * PRs are only created when making a new major version to push the latest version to main before creating the new branch
 
-# v?
+# v9
 
-* Allow specifying yarn version
-* YARN_VERSION default is 4.3.0, is not required, and can be overridden
+* Convert to using modern version of yarn
 
 # v8
 
