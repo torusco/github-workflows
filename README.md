@@ -8,10 +8,6 @@
 * branches are named: v6, v7.1, v8, etc and they are not deleted when PRs are merged
 * PRs are only created when making a new major version to push the latest version to main before creating the new branch
 
-# v9
-
-* Support modern version of yarn using corepack
-
 # v8
 
 * based on v7.3
@@ -20,6 +16,7 @@
 * PY_VERSION python default is now 3.11 by default, is not required, and can be overridden
 * NODE_VERSION node default is now 20 by default, is not required, and can be overridden
 * RUNS_ON for cdk defaults to 8 cores, and latest for all others, is no longer required, and can be overridden
+* Support modern version of yarn using corepack
 
 ## steps to migrate to this version
 
