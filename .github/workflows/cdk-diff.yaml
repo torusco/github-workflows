@@ -24,12 +24,12 @@ on:
         type: string
         required: false
         default: '20.x'
-  
+
       RUNS_ON:
         type: string
         required: false
         default: ubuntu-latest-8-cores
-  
+
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
@@ -69,15 +69,24 @@ jobs:
         with: 
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
-      - name: use github as yarn registry
+      - name: setup yarn and github registry
+        run: |
+          corepack enable
+          yarn config set npmScopes.torusco.npmRegistryServer "https://npm.pkg.github.com"
+          yarn config set npmScopes.torusco.npmAlwaysAuth true
+          yarn config set npmScopes.torusco.npmAuthToken $NPM_AUTH_TOKEN
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: setup node
         uses: actions/setup-node@v4
         with:
           node-version: ${{inputs.NODE_VERSION}}
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
-          cache: 'yarn'      
-  
+          cache: 'yarn'
+
       - name: yarn install && yarn build
         run: |
           yarn install
@@ -98,5 +107,3 @@ jobs:
       - name: CDK Diff
         run: |
           ${{ inputs.YARN_DIFF_COMMAND }}
-
-

@@ -12,10 +12,11 @@
 
 * based on v7.3
 * switch to github oidc provider (remove SAML and saml.to)
-* TERRAFORM_VERSION terraform default is now 1.6.6 by default, is not required, and can be overriden
-* PY_VERSION python default is now 3.11 by default, is not required, and can be overriden
-* NODE_VERSION node default is now 20 by default, is not required, and can be overriden
-* RUNS_ON for cdk defaults to 8 cores, and latest for all others, is no longer required, and can be overriden
+* TERRAFORM_VERSION terraform default is now 1.6.6 by default, is not required, and can be overridden
+* PY_VERSION python default is now 3.11 by default, is not required, and can be overridden
+* NODE_VERSION node default is now 20 by default, is not required, and can be overridden
+* RUNS_ON for cdk defaults to 8 cores, and latest for all others, is no longer required, and can be overridden
+* Support modern version of yarn using corepack
 
 ## steps to migrate to this version
 
