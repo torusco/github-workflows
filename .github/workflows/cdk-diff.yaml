@@ -76,6 +76,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com/'
           always-auth: true
           scope: '@torusco'
+          cache: 'yarn'
 
       - name: setup yarn and github registry
         run: |
