@@ -214,6 +214,7 @@ jobs:
             .github/**
             requirements.txt
             dags/dbt/profiles.yml
+            dags_281/dbt/profiles.yml
 
       - name: List files to sync
         run: |
