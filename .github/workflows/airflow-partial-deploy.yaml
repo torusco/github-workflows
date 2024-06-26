@@ -209,7 +209,9 @@ jobs:
         id: changed-dag-files
         with:
           since_last_remote_commit: false # experiment, get all changes?
-          files: dags/**/*.{py,yml,sql}
+          files: |
+            dags/**/*.{py,yml,sql}
+            dags_281/**/*.{py,yml,sql}
           files_ignore: |
             .github/**
             requirements.txt
