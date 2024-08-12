@@ -107,14 +107,6 @@ on:
       FIVETRAN_APISECRET: 
         required: false
 
-      # DEPRECATED DELETE AFTER https://github.com/torusco/data-infra/pull/490
-      METABASE_USER: 
-        required: false
-
-      # DEPRECATED DELETE AFTER https://github.com/torusco/data-infra/pull/490
-      METABASE_PASS: 
-        required: false
-
       # only required if USES_METABASE
       METABASE_API_KEY: 
         required: false
@@ -249,8 +241,6 @@ jobs:
         if: "${{ inputs.USES_METABASE != '' }}"
         run: |
           # TODO REMOVE USER PASS AFTER https://github.com/torusco/data-infra/pull/490
-          echo "METABASE_USER=${{ secrets.METABASE_USER }}" >> $GITHUB_ENV
-          echo "METABASE_PASS=${{ secrets.METABASE_PASS }}" >> $GITHUB_ENV
           echo "METABASE_API_KEY=${{ secrets.METABASE_API_KEY }}" >> $GITHUB_ENV
 
       - name: Postman Variables Single Team
