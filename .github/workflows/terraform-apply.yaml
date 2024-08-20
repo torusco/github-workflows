@@ -93,6 +93,11 @@ on:
         required: false
         default: false
 
+      USES_TIMESCALE:
+        type: boolean
+        required: false
+        default: false
+
       USES_DATADOG:
         type: boolean
         required: false
@@ -143,6 +148,18 @@ on:
 
       # only required if using auth0 provider
       AUTH0_CLIENT_SECRET:
+        required: false
+
+      # only required if using timescale provider
+      TIMESCALE_PROJECT_ID:
+        required: false
+
+      # only required if using timescale provider
+      TIMESCALE_ACCESS_KEY:
+        required: false
+
+      # only required if using timescale provider
+      TIMESCALE_SECRET_KEY:
         required: false
 
       # only required if using datadog provider
@@ -220,6 +237,7 @@ jobs:
           echo TF_VAR_TARGET_CDK_PREFIX ${{ inputs.TF_VAR_TARGET_CDK_PREFIX }}
           echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
           echo USES_AUTH0 ${{ inputs.USES_AUTH0 }}
+          echo USES_TIMESCALE ${{ inputs.USES_TIMESCALE }}
           echo USES_DATADOG ${{ inputs.USES_DATADOG }}
           echo USES_FIVETRAN ${{ inputs.USES_FIVETRAN }}
           echo USES_OKTA ${{ inputs.USES_OKTA }}
@@ -318,6 +336,16 @@ jobs:
           echo "TF_VAR_auth0_domain=${{ secrets.AUTH0_DOMAIN }}" >> $GITHUB_ENV
           echo "TF_VAR_auth0_client_id=${{ secrets.AUTH0_CLIENT_ID }}" >> $GITHUB_ENV
           echo "TF_VAR_auth0_client_secret=${{ secrets.AUTH0_CLIENT_SECRET }}" >> $GITHUB_ENV
+
+      - name: Timescale Variables
+        if: "${{ inputs.USES_TIMESCALE != '' }}"
+        run: |
+          echo "TIMESCALE_PROJECT_ID=${{ secrets.TIMESCALE_PROJECT_ID }}" >> $GITHUB_ENV
+          echo "$TIMESCALE_ACCESS_KEY=${{ secrets.$TIMESCALE_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "$TIMESCALE_SECRET_KEY=${{ secrets.$TIMESCALE_SECRET_KEY }}" >> $GITHUB_ENV
+          echo "TF_VAR_timescale_project_id=${{ secrets.TIMESCALE_PROJECT_ID }}" >> $GITHUB_ENV
+          echo "TF_VAR_timescale_access_key=${{ secrets.$TIMESCALE_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "TF_VAR_timescale_secret_key=${{ secrets.$TIMESCALE_SECRET_KEY }}" >> $GITHUB_ENV
 
       - name: Datadog Variables
         if: "${{ inputs.USES_DATADOG != '' }}"
