@@ -341,11 +341,11 @@ jobs:
         if: "${{ inputs.USES_TIMESCALE != '' }}"
         run: |
           echo "TIMESCALE_PROJECT_ID=${{ secrets.TIMESCALE_PROJECT_ID }}" >> $GITHUB_ENV
-          echo "$TIMESCALE_ACCESS_KEY=${{ secrets.$TIMESCALE_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "$TIMESCALE_SECRET_KEY=${{ secrets.$TIMESCALE_SECRET_KEY }}" >> $GITHUB_ENV
+          echo "TIMESCALE_ACCESS_KEY=${{ secrets.TIMESCALE_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "TIMESCALE_SECRET_KEY=${{ secrets.TIMESCALE_SECRET_KEY }}" >> $GITHUB_ENV
           echo "TF_VAR_timescale_project_id=${{ secrets.TIMESCALE_PROJECT_ID }}" >> $GITHUB_ENV
-          echo "TF_VAR_timescale_access_key=${{ secrets.$TIMESCALE_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "TF_VAR_timescale_secret_key=${{ secrets.$TIMESCALE_SECRET_KEY }}" >> $GITHUB_ENV
+          echo "TF_VAR_timescale_access_key=${{ secrets.TIMESCALE_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "TF_VAR_timescale_secret_key=${{ secrets.TIMESCALE_SECRET_KEY }}" >> $GITHUB_ENV
 
       - name: Datadog Variables
         if: "${{ inputs.USES_DATADOG != '' }}"
