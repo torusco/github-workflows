@@ -8,7 +8,7 @@ on:
         required: true
 
       CDK_PREFIX:
-        description: environment instance name is used to select the environment gate and to deploy code
+        description: environment instance name is used to select the environment gate and to test code against
         type: string
         required: true
 
@@ -202,7 +202,7 @@ jobs:
           echo "CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
           echo "ENVIRONMENT_LONG_NAME=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
-      - name: Deployer Role with Github OIDC Provider
+      - name: Tester Role with Github OIDC Provider # deployer role
         uses: aws-actions/configure-aws-credentials@v4
         with:
             role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
@@ -267,7 +267,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-passed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-passed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> tested against ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -280,7 +280,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":check-failed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":check-failed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> failed testing against ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -293,7 +293,7 @@ jobs:
           update-ts: ${{ steps.slack.outputs.ts }}
           payload: |
             {
-              "text" : ":black_square_for_stop: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+              "text" : ":black_square_for_stop: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled testing against ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
