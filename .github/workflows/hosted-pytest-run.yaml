@@ -38,11 +38,6 @@ on:
         type: string
         required: false
 
-      SLACK_NOTIFY_ON_FAILURE_ONLY:
-        type: boolean
-        required: false
-        default: false
-
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
@@ -150,7 +145,6 @@ jobs:
           echo PY_RUN_COMMAND ${{ inputs.PY_RUN_COMMAND }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo RUNS_ON_GROUP ${{ inputs.RUNS_ON_GROUP }}
-          echo SLACK_NOTIFY_ON_FAILURE_ONLY ${{ inputs.SLACK_NOTIFY_ON_FAILURE_ONLY }}
           echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
@@ -243,7 +237,7 @@ jobs:
   
       - name: Slack PY Start
         id: slack
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_NOTIFY_ON_FAILURE_ONLY == 'true' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.25.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
@@ -260,7 +254,7 @@ jobs:
           ${{ inputs.PY_RUN_COMMAND }}
           
       - name: Slack PY Complete
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_NOTIFY_ON_FAILURE_ONLY == 'true' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
         uses: slackapi/slack-github-action@v1.25.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
