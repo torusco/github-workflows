@@ -36,6 +36,9 @@ on:
       SSM_BUCKET_PARAMETER_NAME:
         type: string
         required: true
+      DAGS_FOLDER:
+        type: string
+        default: dags_281
 
     secrets:
     
@@ -217,11 +220,9 @@ jobs:
         with:
           since_last_remote_commit: false # experiment, get all changes?
           files: |
-            dags/**/*.{py,yml,sql}
-            dags_281/**/*.{py,yml,sql}
+            ${{ inputs.DAGS_FOLDER }}/**/*.{py,yml,sql}
           files_ignore: |
-            dags/dbt/profiles.yml
-            dags_281/dbt/profiles.yml
+            ${{ inputs.DAGS_FOLDER }}/dbt/profiles.yml
 
       - name: dags - List files to sync
         run: |
