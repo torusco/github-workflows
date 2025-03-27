@@ -48,7 +48,7 @@
 
 ```
   - name: Deployer Role with Github OIDC Provider
-    uses: aws-actions/configure-aws-credentials@v4
+    uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
     with:
         role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
         aws-region: ${{inputs.AWS_REGION}}
