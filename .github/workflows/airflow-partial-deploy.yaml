@@ -194,7 +194,7 @@ jobs:
       - name: Slack Airflow Partial Deploy Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
@@ -212,7 +212,7 @@ jobs:
           echo "S3_BUCKET_NAME=$S3_BUCKET_NAME"
   
       - name: dags - Get changed DAG files including models (if any)
-        uses: tj-actions/changed-files@v41
+        uses: tj-actions/changed-files@823fcebdb31bb35fdf2229d9f769b400309430d0 # v46
         id: changed-dag-files
         with:
           since_last_remote_commit: false # experiment, get all changes?
@@ -256,7 +256,7 @@ jobs:
                     
       - name: Slack Airflow Partial Deploy Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -269,7 +269,7 @@ jobs:
 
       - name: Slack Airflow Partial Deploy Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -282,7 +282,7 @@ jobs:
 
       - name: Slack Airflow Partial Deploy Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}

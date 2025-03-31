@@ -271,7 +271,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - if: inputs.PY_VERSION != ''
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
         with:
           python-version: ${{inputs.PY_VERSION}}    
 
@@ -280,7 +280,7 @@ jobs:
         run: pip3 install -r ${{ inputs.PIP_INSTALL_REQUIREMENTS_FILE }}
           
       - name: Terraform Setup
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_wrapper: true
           terraform_version: ${{ inputs.TERRAFORM_VERSION }}
@@ -388,7 +388,7 @@ jobs:
       - name: Slack Terraform Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
@@ -441,7 +441,7 @@ jobs:
   
       - name: Slack Terraform Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -454,7 +454,7 @@ jobs:
 
       - name: Slack Terraform Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -467,7 +467,7 @@ jobs:
 
       - name: Slack Terraform Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}

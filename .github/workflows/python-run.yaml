@@ -189,7 +189,7 @@ jobs:
           token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: Set up Python ${{ inputs.PY_VERSION }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
         with:
           python-version: ${{ inputs.PY_VERSION }}
             
@@ -201,7 +201,7 @@ jobs:
 
       - name: install poetry
         if: "${{ inputs.USES_POETRY != '' }}"
-        uses: snok/install-poetry@v1
+        uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
     
       - name: poetry install
         if: "${{ inputs.USES_POETRY != '' }}"
@@ -256,7 +256,7 @@ jobs:
       - name: Slack PY Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != ''}}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
@@ -273,13 +273,13 @@ jobs:
           
       - name: Upload Artifacts
         if: "${{ inputs.UPLOAD_ARTIFACTS != ''}}"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           path: ${{ inputs.UPLOAD_ARTIFACTS}}
 
       - name: Slack PY Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != ''}}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -292,7 +292,7 @@ jobs:
 
       - name: Slack PY Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -305,7 +305,7 @@ jobs:
 
       - name: Slack Python Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
