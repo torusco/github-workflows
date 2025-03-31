@@ -135,7 +135,7 @@ jobs:
 
       - if: github.event.client_payload.ref != ''
         name: actions/checkout@v4 client payload ref
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
           ref: ${{ github.event.client_payload.ref }}
@@ -149,16 +149,16 @@ jobs:
 
       - if: github.event.client_payload.ref == ''
         name: actions/checkout@v4 default ref
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: Set up Python ${{ inputs.PY_VERSION }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
         with:
           python-version: ${{ inputs.PY_VERSION }}
             
-      - uses: saml-to/assume-aws-role-action@v1
+      - uses: saml-to/assume-aws-role-action@b7d7ce65384c7d07463e2313b71ccf8b35a147e0 # v1.0.13-0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -174,7 +174,7 @@ jobs:
 
       - name: install poetry
         if: "${{ inputs.USES_POETRY != '' }}"
-        uses: snok/install-poetry@v1
+        uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
     
       - name: poetry install
         if: "${{ inputs.USES_POETRY != '' }}"
@@ -188,7 +188,7 @@ jobs:
           echo "ENVIRONMENT_LONG_NAME=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
       - name: Deployer Role
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
@@ -219,7 +219,7 @@ jobs:
       - name: Slack PY Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           payload: |
@@ -236,7 +236,7 @@ jobs:
           
       - name: Slack PY Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -249,7 +249,7 @@ jobs:
 
       - name: Slack PY Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
@@ -262,7 +262,7 @@ jobs:
 
       - name: Slack Python Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
           update-ts: ${{ steps.slack.outputs.ts }}
