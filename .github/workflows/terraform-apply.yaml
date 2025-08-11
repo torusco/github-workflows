@@ -83,17 +83,12 @@ on:
         required: false
         description: "set TF_VAR_TARGET_CDK_PREFIX to this value if passed"
   
-      USES_CLOUDFLARE:
-        type: boolean
-        required: false
-        default: false
-
       USES_AUTH0:
         type: boolean
         required: false
         default: false
 
-      USES_TIMESCALE:
+      USES_CLOUDFLARE:
         type: boolean
         required: false
         default: false
@@ -133,6 +128,19 @@ on:
         required: false
         default: false
 
+      USES_TIMESCALE:
+        type: boolean
+        required: false
+        default: false
+        description: SW Team Timescale configuration
+
+      USES_TIMESCALE_DATA:
+        type: boolean
+        required: false
+        default: false
+        description: Data Team Timescale configuration
+  
+  
     secrets:
       # only required if using cloudflare provider
       CLOUDFLARE_API_TOKEN: 
