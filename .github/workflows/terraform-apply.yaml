@@ -201,16 +201,24 @@ on:
       SLACK_BOT_TOKEN:
         required: false
 
-      # only required if using timescale provider
+      # only required if using timescale provider USES_TIMESCALE=true
       TIMESCALE_PROJECT_ID:
         required: false
 
-      # only required if using timescale provider
+      # only required if using timescale provider USES_TIMESCALE=true
       TIMESCALE_ACCESS_KEY:
         required: false
 
-      # only required if using timescale provider
+      # only required if using timescale provider USES_TIMESCALE=true
       TIMESCALE_SECRET_KEY:
+        required: false
+
+      # only required if using timescale data provider USES_TIMESCALE_DATA=true
+      TIMESCALE_DATA_ACCESS_KEY:
+        required: false
+
+      # only required if using timescale data provider USES_TIMESCALE_DATA=true
+      TIMESCALE_DATA_SECRET_KEY:
         required: false
 
 
