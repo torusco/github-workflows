@@ -231,7 +231,7 @@ jobs:
             aws-region: ${{inputs.AWS_REGION}}
 
       - name: Collate Variables
-        if: "${{ inputs.COLLATE_JWT_TOKEN != '' }}"
+        if: "${{ inputs.USES_COLLATE != '' }}"
         run: |
           echo "COLLATE_JWT_TOKEN=${{ secrets.COLLATE_JWT_TOKEN }}" >> $GITHUB_ENV
       
