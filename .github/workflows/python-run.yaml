@@ -31,6 +31,12 @@ on:
         required: false
         default: '3.12'
   
+      REQUIREMENTS_FILE:
+        description: "path to requirements file relative to PY_FOLDER_NAME, default is requirements.txt"
+        type: string
+        required: false
+        default: 'requirements.txt'
+  
       RUNS_ON:
         type: string
         required: false
@@ -75,6 +81,11 @@ on:
         default: true
     
       USES_POETRY:
+        type: boolean
+        required: false
+        default: false
+    
+      USES_UV:
         type: boolean
         required: false
         default: false
@@ -157,6 +168,7 @@ jobs:
           echo PY_FOLDER_NAME ${{ inputs.PY_FOLDER_NAME }}
           echo PY_RUN_COMMAND ${{ inputs.PY_RUN_COMMAND }}
           echo PY_VERSION ${{ inputs.PY_VERSION }}
+          echo REQUIREMENTS_FILE ${{ inputs.REQUIREMENTS_FILE }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
@@ -166,6 +178,7 @@ jobs:
           echo USES_METABASE ${{ inputs.USES_METABASE }}
           echo USES_PIP ${{ inputs.USES_PIP }}
           echo USES_POETRY ${{ inputs.USES_POETRY }}
+          echo USES_UV ${{ inputs.USES_UV }}
           echo USES_POSTMAN ${{ inputs.USES_POSTMAN }}
           echo USES_POSTMAN_APP_AND_DATA ${{ inputs.USES_POSTMAN_APP_AND_DATA }}
           echo USES_STRIPE ${{ inputs.USES_STRIPE }}
@@ -207,7 +220,7 @@ jobs:
         if: "${{ inputs.USES_PIP != '' }}"
         run: |
             cd ${{ inputs.PY_FOLDER_NAME }}
-            pip install -r requirements.txt
+            pip install -r ${{ inputs.REQUIREMENTS_FILE }}
 
       - name: install poetry
         if: "${{ inputs.USES_POETRY != '' }}"
@@ -218,6 +231,22 @@ jobs:
         run: |
             cd ${{ inputs.PY_FOLDER_NAME }}
             poetry install
+    
+      - name: install uv
+        if: "${{ inputs.USES_UV != '' }}"
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+    
+      - name: uv sync
+        if: "${{ inputs.USES_UV != '' }}"
+        run: |
+            cd ${{ inputs.PY_FOLDER_NAME }}
+            if [ -f "pyproject.toml" ]; then
+              uv sync
+            else
+              uv pip install -r ${{ inputs.REQUIREMENTS_FILE }}
+            fi
     
       - name: ENV VARS
         run: |
