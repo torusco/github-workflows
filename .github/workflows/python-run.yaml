@@ -236,7 +236,8 @@ jobs:
         if: "${{ inputs.USES_UV != '' }}"
         uses: astral-sh/setup-uv@v3
         with:
-          enable-cache: true
+          # set to false since no uv lock / pyproject.toml
+          enable-cache: false
     
       - name: uv sync
         if: "${{ inputs.USES_UV != '' }}"
