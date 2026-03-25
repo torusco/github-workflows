@@ -21,7 +21,7 @@ on:
         description: "if included, the action will run pip3 install for the provided requirements files"
 
       PY_VERSION:
-        description: "the python version to install, ex 3.10 or 3.11"
+        description: "the python version to install, ex 3.10 or 3.11, default is 3.12"
         type: string
         required: false
         default: "3.12"

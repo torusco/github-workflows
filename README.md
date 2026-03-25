@@ -8,6 +8,13 @@
 * branches are named: v6, v7.1, v8, etc and they are not deleted when PRs are merged
 * PRs are only created when making a new major version to push the latest version to main before creating the new branch
 
+# v8.1
+* based on v8
+* update github actions to newer versions
+* node 24
+* terraform TBD
+* python 3.12
+
 # v8
 
 * based on v7.3
