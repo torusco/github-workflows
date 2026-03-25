@@ -102,15 +102,13 @@ jobs:
       - name: Slack CDK Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":large_yellow_circle: :airflow: Waiting! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: ":large_yellow_circle: :airflow: Waiting! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Waiter Check Airflow is Ready
         continue-on-error: true
@@ -131,39 +129,33 @@ jobs:
           
       - name: Slack CDK Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":check-passed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-passed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack CDK Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":check-failed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-failed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack CDK Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":black_square_for_stop: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":black_square_for_stop: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.AIRFLOW_ENVIRONMENT_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
