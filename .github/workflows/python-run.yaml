@@ -192,8 +192,8 @@ jobs:
           echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref != ''
-        name: actions/checkout@v4 client payload ref
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        name: checkout client payload ref
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
           ref: ${{ github.event.client_payload.ref }}
@@ -206,8 +206,8 @@ jobs:
           echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
 
       - if: github.event.client_payload.ref == ''
-        name: actions/checkout@v4 default ref
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        name: checkout default ref
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
 
