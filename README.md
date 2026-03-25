@@ -9,6 +9,9 @@
 * PRs are only created when making a new major version to push the latest version to main before creating the new branch
 
 # v8.1
+
+An argument compatible Node 24 update.
+
 * based on v8
 * update github actions to newer versions
 * node 24
@@ -16,26 +19,10 @@
 * python 3.12
 * Slack API to v3
 
-# v8
-
-* based on v7.3
-* switch to github oidc provider (remove SAML and saml.to)
-* TERRAFORM_VERSION terraform default is now 1.6.6 by default, is not required, and can be overridden
-* PY_VERSION python default is now 3.11 by default, is not required, and can be overridden
-* NODE_VERSION node default is now 20 by default, is not required, and can be overridden
-* RUNS_ON for cdk defaults to 8 cores, and latest for all others, is no longer required, and can be overridden
-* Support modern version of yarn using corepack
-
 ## steps to migrate to this version
 
-1. Delete saml-to
-2. Switch to v8
-3. Delete all refs to SAML_AWS_ROLE_ARN including delet the now extra step where SAML was assumed, only aws-actions/configure-aws-credentials is needed now
-4. Update any Deployer role steps to configure aws credentials below and add permissions to any job that directly calls configure-aws-credentials
-5. Update TARGET_AWS_ACCOUNT_ROLE_ARN to be account based
-6. Rename yarn-test to cdk-test
-7. Remove RUNS_ON unless you want to override
-8. Add any overrides for TERRAFORM_VERSION, PY_VERSION, NODE_VERSION but recommendation is to remove and not override
+1. Look for any local github workflows and update those first
+2. Switch to v8.1
 
 # Examples
 
