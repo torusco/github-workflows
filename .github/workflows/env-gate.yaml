@@ -65,15 +65,13 @@ jobs:
 
       - name: Slack Message
         id: slack
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":eyes: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} ${{ inputs.ADDITIONAL_APPROVAL_TEXT }} waiting for approval... <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> :click-here: <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}       
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: ":eyes: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} ${{ inputs.ADDITIONAL_APPROVAL_TEXT }} waiting for approval... <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> :click-here: <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "       
 
   environment_gate:
     needs: [ pre_check_gate ]
@@ -105,29 +103,27 @@ jobs:
           fi
 
       - name: Approved
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ env.TS}}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":check-passed: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} ${{ inputs.ADDITIONAL_APPROVAL_TEXT }} approved! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ env.TS}}
+            text: ":check-passed: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} ${{ inputs.ADDITIONAL_APPROVAL_TEXT }} approved! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
           TS: ${{ needs.pre_check_gate.outputs.ts }}        
 
       - name: Cancelled
         if: "${{ cancelled() }}"
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ env.TS}}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":black_square_for_stop: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} ${{ inputs.ADDITIONAL_APPROVAL_TEXT }} cancelled! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ env.TS}}
+            text: ":black_square_for_stop: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} ${{ inputs.ADDITIONAL_APPROVAL_TEXT }} cancelled! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}  
           TS: ${{ needs.pre_check_gate.outputs.ts }}        
   
