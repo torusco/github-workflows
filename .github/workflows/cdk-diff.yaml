@@ -1,4 +1,4 @@
-name: "CDK Diff v8"
+name: "CDK Diff v8.1"
 
 on:
   workflow_call:

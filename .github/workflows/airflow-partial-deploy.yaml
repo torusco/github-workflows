@@ -1,4 +1,4 @@
-name: "Airflow Partial Deploy v8"
+name: "Airflow Partial Deploy v8.1"
 
 on:
   workflow_call:

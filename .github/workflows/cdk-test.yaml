@@ -1,4 +1,4 @@
-name: "CDK Test v8"
+name: "CDK Test v8.1"
 # was yarn-test.yaml, now cdk-test.yaml
 
 on:

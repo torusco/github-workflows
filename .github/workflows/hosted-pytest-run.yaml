@@ -1,4 +1,4 @@
-name: "Self Hosted Pytest Run v8"
+name: "Self Hosted Pytest Run v8.1"
 
 on:
   workflow_call:
