@@ -194,15 +194,13 @@ jobs:
       - name: Slack Airflow Partial Deploy Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":large_yellow_circle: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: partial deploy started <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: ":large_yellow_circle: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: partial deploy started <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: S3 Bucket Name 
         id: bucket_name
@@ -256,39 +254,33 @@ jobs:
                     
       - name: Slack Airflow Partial Deploy Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":check-passed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: Partial Deploy Success! Updated: ${{ env.CHANGED_COUNT }} Deleted: ${{ env.DELETED_COUNT }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-passed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: Partial Deploy Success! Updated: ${{ env.CHANGED_COUNT }} Deleted: ${{ env.DELETED_COUNT }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack Airflow Partial Deploy Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":check-failed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: Partial Deploy Failed! Updated: ${{ env.CHANGED_COUNT }} Deleted: ${{ env.DELETED_COUNT }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-failed: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: Partial Deploy Failed! Updated: ${{ env.CHANGED_COUNT }} Deleted: ${{ env.DELETED_COUNT }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack Airflow Partial Deploy Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":heavy_multiplication_x: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: Partial Deploy Cancelled! <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":heavy_multiplication_x: :airflow: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ github.event_name }} ${{ github.ref }} ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} :${{ github.actor }}: Partial Deploy Cancelled! <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
