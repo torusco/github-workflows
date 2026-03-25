@@ -77,7 +77,7 @@ jobs:
           echo "DELETED_COUNT=0" >> $GITHUB_ENV
 
       - name: Deployer Role with Github OIDC Provider
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0 Mar2026
         with:
             role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
             aws-region: ${{inputs.AWS_REGION}}
@@ -167,7 +167,7 @@ jobs:
 
       - if: github.event.client_payload.ref != ''
         name: checkout client payload ref
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 Jan2026
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
           ref: ${{ github.event.client_payload.ref }}
@@ -181,7 +181,7 @@ jobs:
 
       - if: github.event.client_payload.ref == ''
         name: checkout client payload ref
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 Jan2026
         with:
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 

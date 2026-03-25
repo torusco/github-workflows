@@ -273,7 +273,7 @@ jobs:
 
       - if: github.event.client_payload.ref != ''
         name: checkout client payload ref
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 Jan2026
         with:
           ref: ${{ github.event.client_payload.ref }}
 
@@ -286,7 +286,7 @@ jobs:
 
       - if: github.event.client_payload.ref == ''
         name: checkout default ref
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 Jan2026
 
       - if: inputs.PY_VERSION != ''
         uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
