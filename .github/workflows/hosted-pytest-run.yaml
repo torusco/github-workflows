@@ -188,8 +188,8 @@ jobs:
         if: "${{ inputs.USES_PIP != '' }}"
         run: |
             cd ${{ inputs.PY_FOLDER_NAME }}
-            pip3.11 install -r requirements.txt
-            pip3.11 install -r requirements-test.txt
+            pip3.12 install -r requirements.txt
+            pip3.12 install -r requirements-test.txt
     
       - name: ENV VARS
         run: |
