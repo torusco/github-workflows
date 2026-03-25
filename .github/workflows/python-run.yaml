@@ -212,7 +212,7 @@ jobs:
           token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: Set up Python ${{ inputs.PY_VERSION }}
-        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0 Jan2026
         with:
           python-version: ${{ inputs.PY_VERSION }}
             
