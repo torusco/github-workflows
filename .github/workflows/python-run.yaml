@@ -255,7 +255,7 @@ jobs:
           echo "ENVIRONMENT_LONG_NAME=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
       - name: Deployer Role with Github OIDC Provider
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0 Feb2026
         with:
             role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
             aws-region: ${{inputs.AWS_REGION}}
