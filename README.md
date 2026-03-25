@@ -10,6 +10,8 @@
 
 # v8
 
+! See v8.1 for Node 24
+
 * based on v7.3
 * switch to github oidc provider (remove SAML and saml.to)
 * TERRAFORM_VERSION terraform default is now 1.6.6 by default, is not required, and can be overridden
