@@ -14,6 +14,7 @@
 * node 24
 * terraform TBD
 * python 3.12
+* TODO Slack API to v3
 
 # v8
 
