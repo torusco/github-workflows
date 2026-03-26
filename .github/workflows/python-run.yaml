@@ -234,7 +234,7 @@ jobs:
     
       - name: install uv
         if: "${{ inputs.USES_UV != '' }}"
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0 Mar2026
         with:
           # set to false since no uv lock / pyproject.toml
           enable-cache: false
