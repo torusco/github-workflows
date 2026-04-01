@@ -1,0 +1,231 @@
+name: Build Data Container v8.1
+
+on:
+  workflow_call:
+    inputs:
+
+      AWS_REGION:
+        type: string
+        required: true
+
+      DOCKERFILE_FOLDER:
+        description: the folder containing the Dockerfile
+        required: true
+        type: string
+
+      FROM_IMAGE:
+        description: the base image to use for the Docker build
+        required: false
+        type: string
+
+      FORCE:
+        description: whether to force the build
+        type: boolean
+        required: false
+        default: false
+
+      PYTHON_VERSION:
+        description: the version of python to use
+        required: true
+        type: string
+
+      REGISTRY:
+        description: the registry to use
+        required: true
+        type: string
+
+      REPOSITORY:
+        description: the repository name
+        required: true
+        type: string
+
+      RUNS_ON:
+        description: the runner to use
+        type: string
+        required: false
+        default: "ubuntu-latest-8-cores"
+
+      SLACK_CHANNEL_ID:
+        type: string
+        required: false
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: true
+  
+    outputs:
+      CONTAINER_BUILT:
+        description: "Whether the container was built or not"
+        value: ${{ jobs.data_container.outputs.CONTAINER_BUILT }}
+
+    secrets:
+
+      # only required if using slack provider
+      SLACK_BOT_TOKEN:
+        required: false
+
+      # required for using github refs
+      NPM_TOKEN:
+        required: true
+jobs:
+
+  data_container:
+
+    runs-on: ${{ inputs.RUNS_ON }}
+    
+    outputs:
+      CONTAINER_BUILT: ${{ steps.changed-container-files.outputs.any_changed }}
+
+    permissions: # github oidc
+      id-token: write
+      contents: read
+
+    steps:
+      - name: echo
+        run: |
+          echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo DOCKERFILE_FOLDER ${{ inputs.DOCKERFILE_FOLDER }}
+          echo FROM_IMAGE ${{ inputs.FROM_IMAGE }}
+          echo FORCE ${{ inputs.FORCE }}
+          echo PYTHON_VERSION ${{ inputs.PYTHON_VERSION }}
+          echo REGISTRY ${{ inputs.REGISTRY }}
+          echo REPOSITORY ${{ inputs.REPOSITORY }}
+          echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 Jan2026
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Get changed container files in ${{inputs.DOCKERFILE_FOLDER}}
+        if: ${{ inputs.FORCE != 'true' }}
+        uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5 Feb2026v46
+        id: changed-container-files
+        with:
+          files: |
+            ${{inputs.DOCKERFILE_FOLDER}}/**
+            # this is how is different, only builds for changes to its own folder
+          include_all_old_new_renamed_files: true
+
+      - name: Print all changed files
+        if: inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true'
+        run: |
+          echo "All changed files:"
+          echo "${{ steps.changed-container-files.outputs.all_changed_files }}"
+
+      - name: Set up Python ${{ inputs.PYTHON_VERSION }}
+        if: inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true'
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0 Jan2026
+        with:
+          python-version: ${{ inputs.PYTHON_VERSION }}
+
+      - name: Copy version
+        if: inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true'
+        id: version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # copy in new version
+          rm ${{inputs.DOCKERFILE_FOLDER}}/version.py
+          cp ./version.py ${{inputs.DOCKERFILE_FOLDER}}/version.py
+
+          # get as a var
+          LINE=$(cat ${{inputs.DOCKERFILE_FOLDER}}/version.py | grep version)
+          VERSION=${LINE:11:-1}
+
+          # get the version as used by release notes step
+          echo "VERSION=v$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION: $VERSION"
+
+          # make link back to release notes
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Slack Build Start
+        id: slack
+        if: ${{ inputs.SLACK_CHANNEL_ID != '' && (inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true')}}
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: ":large_yellow_circle: :docker: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Building container ${{inputs.REPOSITORY}} for <${{ steps.version.outputs.GITHUB_VERSION_URL_FOR_SLACK }}|${{ steps.version.outputs.VERSION }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
+
+      - name: Deployer Role with Github OIDC Provider
+        if: inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true'
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0 Feb2026
+        with:
+          role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
+          aws-region: ${{inputs.AWS_REGION}}
+
+      - name: Set up Docker Buildx
+        if: inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true'
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0 Feb2026
+        with:
+          platforms: linux/arm64
+
+      - name: Login to Amazon ECR
+        if: inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896 # v2.1.1 Mar2026
+        with:
+          registry-type: private
+
+      - name: Build, tag, and push image to Amazon ECR with FROM_IMAGE
+        if: inputs.FROM_IMAGE != '' && (inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true')
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0 Feb2026
+        with:
+          context: . 
+          file: ${{inputs.DOCKERFILE_FOLDER}}/Dockerfile
+          push: true
+          platforms: linux/arm64
+          provenance: false
+          tags: ${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:latest,${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:${{ steps.version.outputs.VERSION }}
+          build-args: |
+            FROM_IMAGE=${{ inputs.FROM_IMAGE }}
+
+      - name: Build, tag, and push image to Amazon ECR
+        if: inputs.FROM_IMAGE == '' && (inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true')
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0 Feb2026
+        with:
+          context: . 
+          file: ${{inputs.DOCKERFILE_FOLDER}}/Dockerfile
+          push: true
+          platforms: linux/arm64
+          provenance: false
+          tags: ${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:latest,${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:${{ steps.version.outputs.VERSION }}
+
+      - name: Slack Build Complete
+        if: ${{ inputs.SLACK_CHANNEL_ID != '' && (inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true')}}
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-passed: :docker: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Published container ${{inputs.REPOSITORY}} for <${{ steps.version.outputs.GITHUB_VERSION_URL_FOR_SLACK }}|${{ steps.version.outputs.VERSION }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
+
+      - name: Slack Build Failure
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-failed: :docker: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Failed container build for ${{inputs.REPOSITORY}} for <${{ steps.version.outputs.GITHUB_VERSION_URL_FOR_SLACK }}|${{ steps.version.outputs.VERSION }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
+
+      - name: Slack Build Cancelled
+        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":black_square_for_stop: :docker: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Cancelled container build for ${{inputs.REPOSITORY}} for <${{ steps.version.outputs.GITHUB_VERSION_URL_FOR_SLACK }}|${{ steps.version.outputs.VERSION }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
