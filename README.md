@@ -15,7 +15,7 @@ An argument compatible Node 24 update.
 * based on v8
 * update github actions to newer versions
 * node 24
-* terraform TBD
+* terraform 1.14.8
 * python 3.12
 * Slack API to v3
 
