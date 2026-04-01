@@ -111,7 +111,7 @@ jobs:
             text: ":large_yellow_circle: :kubernetes: Running! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.KUBECTL_SCRIPT }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@15650b3ad78fff148532a140b8a4c821796b2d7b # v5.0.0 Mar2026
         with:
           version: ${{ inputs.KUBECTL_VERSION }}
 
