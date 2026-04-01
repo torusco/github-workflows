@@ -1,10 +1,10 @@
-name: "Setup Python v8"
+name: "Setup Python v8.1"
 # not tested in v8
 inputs:
   python_version:
     type: string
     required: false
-    default: "3.10"
+    default: "3.12"
 
   virtualenvs-create:
     description: " Whether Poetry should create a virtualenv or not"

@@ -158,7 +158,7 @@ note: renamed from yarn-test
     uses: torusco/github-workflows/.github/workflows/python-run.yaml@v8.1
     with:
       PY_FOLDER_NAME: 'py-metabase-config'
-      PY_VERSION: '3.11'
+      PY_VERSION: '3.12'
       PY_RUN_COMMAND: 'python ga-configure-metabase-redshift.py'
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
@@ -183,7 +183,7 @@ note: renamed from yarn-test
       TARGET_TERRAFORM_FOLDER_NAME: tf-fivetran-name
       TERRAFORM_VAR_FILE: ./${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}/${{ needs.globals.outputs.CDK_PREFIX }}.tfvars
       PIP_INSTALL_REQUIREMENTS_FILE: ./tf-fivetran-name/requirements.txt
-      PY_VERSION: "3.11"
+      PY_VERSION: "3.12"
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
       ENVIRONMENT_LONG_NAME: ${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}
