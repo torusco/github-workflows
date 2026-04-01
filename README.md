@@ -56,7 +56,7 @@ An argument compatible Node 24 update.
   check_airflow_is_ready:
     if: ${{ !contains( github.event.pull_request.labels.*.name, 'data_skip_airflow') }}
     needs: [ globals, ... ]
-    uses: torusco/github-workflows/.github/workflows/airflow-waiter.yaml@v8
+    uses: torusco/github-workflows/.github/workflows/airflow-waiter.yaml@v8.1
     with:
       AIRFLOW_ENVIRONMENT_NAME: ${{ needs.globals.outputs.AIRFLOW_ENVIRONMENT_NAME }}
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
@@ -75,7 +75,7 @@ An argument compatible Node 24 update.
 ```
   cdk_example:
     needs: [globals]
-    uses: torusco/github-workflows/.github/workflows/cdk-deploy.yaml@v8
+    uses: torusco/github-workflows/.github/workflows/cdk-deploy.yaml@v8.1
     with:
       CDK_FOLDER_NAME: 'cdk-folder-name'
       YARN_DEPLOY_COMMAND: 'yarn pipeline-deploy-folder-name'
@@ -95,7 +95,7 @@ An argument compatible Node 24 update.
   long_short:
 
     needs: [ globals ]
-    uses: torusco/github-workflows/.github/workflows/cdk-diff.yaml@v8
+    uses: torusco/github-workflows/.github/workflows/cdk-diff.yaml@v8.1
     with:
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_FOLDER_NAME: cdk-name
@@ -115,7 +115,7 @@ note: renamed from yarn-test
   update_sonar_main_analysis:
 
     if: ${{ !contains( github.event.pull_request.labels.*.name, 'nodeploy') || github.event.pull_request.merged == false }}
-    uses: torusco/github-workflows/.github/workflows/cdk-test.yaml@v8
+    uses: torusco/github-workflows/.github/workflows/cdk-test.yaml@v8.1
     with:
       YARN_TEST_COMMAND: "yarn test"
       USES_SONAR_CLOUD: true
@@ -128,7 +128,7 @@ note: renamed from yarn-test
 ```
     yarn_test_cdks:
         needs: [globals]
-        uses: torusco/github-workflows/.github/workflows/cdk-test.yaml@v8
+        uses: torusco/github-workflows/.github/workflows/cdk-test.yaml@v8.1
         with:
             YARN_TEST_COMMAND: 'yarn pipeline-test'
         secrets:
@@ -141,7 +141,7 @@ note: renamed from yarn-test
 ```
   gate_check:
     needs: [globals]
-    uses: torusco/github-workflows/.github/workflows/env-gate.yaml@v8
+    uses: torusco/github-workflows/.github/workflows/env-gate.yaml@v8.1
     with:
       SLACK_CHANNEL_ID: ${{ needs.globals.outputs.SLACK_CHANNEL_ID }}
       CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
@@ -155,7 +155,7 @@ note: renamed from yarn-test
 ```
   python_metabase_example:
     needs: [ globals, ... ]
-    uses: torusco/github-workflows/.github/workflows/python-run.yaml@v8
+    uses: torusco/github-workflows/.github/workflows/python-run.yaml@v8.1
     with:
       PY_FOLDER_NAME: 'py-metabase-config'
       PY_VERSION: '3.11'
@@ -178,7 +178,7 @@ note: renamed from yarn-test
 ```
   tf_fivetran_with_python:
     needs: [globals, ... ]
-    uses: torusco/github-workflows/.github/workflows/terraform-apply.yaml@v8
+    uses: torusco/github-workflows/.github/workflows/terraform-apply.yaml@v8.1
     with:
       TARGET_TERRAFORM_FOLDER_NAME: tf-fivetran-name
       TERRAFORM_VAR_FILE: ./${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}/${{ needs.globals.outputs.CDK_PREFIX }}.tfvars
@@ -199,7 +199,7 @@ note: renamed from yarn-test
 ```
   tf_uses_cloudflare:
     needs: [globals, cdk_redshift]
-    uses: torusco/github-workflows/.github/workflows/terraform-apply.yaml@v8
+    uses: torusco/github-workflows/.github/workflows/terraform-apply.yaml@v8.1
     with:
       TARGET_TERRAFORM_FOLDER_NAME: tf-cloudflare-name
       TERRAFORM_VAR_FILE: ./${{ needs.globals.outputs.ENVIRONMENT_LONG_NAME }}/.tfvars
@@ -219,7 +219,7 @@ note: renamed from yarn-test
 ```
     terraform_checkov_name:
         needs: [globals]
-        uses: torusco/github-workflows/.github/workflows/terraform-checkov.yaml@v8
+        uses: torusco/github-workflows/.github/workflows/terraform-checkov.yaml@v8.1
         with:
             TARGET_TERRAFORM_FOLDER_NAME: tf-name
             CDK_PREFIX: ${{ needs.globals.outputs.CDK_PREFIX }}
@@ -234,7 +234,7 @@ note: renamed from yarn-test
   tf_pull_request:
 
     needs: globals
-    uses: torusco/github-workflows/.github/workflows/terraform-pull-request.yaml@v8
+    uses: torusco/github-workflows/.github/workflows/terraform-pull-request.yaml@v8.1
     with:
       AWS_REGION: ${{ needs.globals.outputs.AWS_REGION }}
       CDK_PREFIX: "shortname"
