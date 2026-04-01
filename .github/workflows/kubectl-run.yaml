@@ -1,0 +1,159 @@
+name: "Kubectl Run v8.1"
+
+on:
+  workflow_call:
+    inputs:
+      AWS_REGION:
+        type: string
+        required: true
+
+      KUBECTL_VERSION:
+        description: "Version of kubectl to install"
+        type: string
+        required: false
+        default: 'v1.33.0'
+
+      KUBECTL_FOLDER_NAME:
+        description: "use this folder that contains the kubectl script and other files"
+        type: string
+        required: true
+
+      KUBECTL_SCRIPT:
+        description: "Script to run with kubectl (relative to KUBECTL_FOLDER_NAME, can include arguments)"
+        type: string
+        required: true
+
+      RUNS_ON:
+        type: string
+        required: false
+        default: ubuntu-latest
+
+      SLACK_CHANNEL_ID:
+        type: string
+        required: false
+
+      TARGET_AWS_ACCOUNT_ROLE_ARN:
+        type: string
+        required: true
+
+    secrets:
+      # required for GITHUB checkout / NPM_TOKEN on other workflows
+      CHECKOUT_TOKEN:
+        required: true
+
+      # always required for slack notifications
+      SLACK_BOT_TOKEN:
+        required: false
+
+jobs:
+
+  kubectl_run:
+
+    runs-on: ${{ inputs.RUNS_ON }}
+
+    permissions: # github oidc
+      id-token: write
+      contents: read
+
+    steps:
+
+      - name: echo
+        run: |
+          echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo KUBECTL_VERSION ${{ inputs.KUBECTL_VERSION }}
+          echo KUBECTL_FOLDER_NAME ${{ inputs.KUBECTL_FOLDER_NAME }}
+          echo KUBECTL_SCRIPT ${{ inputs.KUBECTL_SCRIPT }}
+          echo RUNS_ON ${{ inputs.RUNS_ON }}
+          echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
+          echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
+          echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref != ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use ${{ github.event.client_payload.ref }} not ${{ github.ref }}"
+          echo "GITHUB_CHECKOUT_REF=${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.event.client_payload.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref != ''
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 Jan2026
+        with:
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+          ref: ${{ github.event.client_payload.ref }}
+
+      - if: github.event.client_payload.ref == ''
+        name: GITHUB_CHECKOUT_REF
+        run: |
+          echo "use default ${{ github.ref }}"
+          echo "GITHUB_CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - if: github.event.client_payload.ref == ''
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 Jan2026
+        with:
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+
+      - name: Deployer Role with Github OIDC Provider
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0 Feb2026
+        with:
+            role-to-assume: ${{inputs.TARGET_AWS_ACCOUNT_ROLE_ARN}}
+            aws-region: ${{inputs.AWS_REGION}}
+
+      - name: Slack Kubectl Start
+        id: slack
+        if: "${{ inputs.SLACK_CHANNEL_ID != ''}}"
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: ":large_yellow_circle: :kubernetes: Running! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.KUBECTL_SCRIPT }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: ${{ inputs.KUBECTL_VERSION }}
+
+      - name: Run kubectl script
+        id: kubectl_script
+        run: |
+          cd ${{ inputs.KUBECTL_FOLDER_NAME }}
+          ${{ inputs.KUBECTL_SCRIPT }}
+        continue-on-error: true
+
+      - name: Slack Kubectl Complete
+        if: "${{ inputs.SLACK_CHANNEL_ID != ''}}"
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ fromJson(steps.slack.outputs.response).ts }}
+            text: ":check-passed: :kubernetes: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.KUBECTL_SCRIPT }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> completed <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+
+      - name: Slack Kubectl Failure
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ fromJson(steps.slack.outputs.response).ts }}
+            text: ":check-failed: :kubernetes: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.KUBECTL_SCRIPT }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> failed <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+
+      - name: Slack Kubectl Cancelled
+        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ fromJson(steps.slack.outputs.response).ts }}
+            text: ":black_square_for_stop: :kubernetes: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.KUBECTL_SCRIPT }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+
+    outputs:
+      script_outcome: ${{ steps.kubectl_script.outcome }}
