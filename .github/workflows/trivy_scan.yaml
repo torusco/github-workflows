@@ -113,9 +113,8 @@ jobs:
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
             text: ":large_yellow_circle: :shield: :${{ github.event.repository.name }}: Starting Trivy vulnerability scan for ${{ inputs.REPOSITORY }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
 
-      # last updated trivy scan version 16Mar2026 https://github.com/aquasecurity/trivy-action/releases/tag/0.35.0
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.69.3 Mar2026
         with:
           scan-type: image
           image-ref: ${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:latest
