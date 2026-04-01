@@ -205,7 +205,7 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
-            ts: ${{ steps.slack.outputs.ts }}
+            ts: ${{ fromJson(steps.slack.outputs.response).ts }}
             text: ":check-passed: :docker: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Published container ${{inputs.REPOSITORY}} for <${{ steps.version.outputs.GITHUB_VERSION_URL_FOR_SLACK }}|${{ steps.version.outputs.VERSION }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
 
       - name: Slack Build Failure
@@ -216,7 +216,7 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
-            ts: ${{ steps.slack.outputs.ts }}
+            ts: ${{ fromJson(steps.slack.outputs.response).ts }}
             text: ":check-failed: :docker: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Failed container build for ${{inputs.REPOSITORY}} for <${{ steps.version.outputs.GITHUB_VERSION_URL_FOR_SLACK }}|${{ steps.version.outputs.VERSION }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
 
       - name: Slack Build Cancelled
@@ -227,5 +227,5 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
-            ts: ${{ steps.slack.outputs.ts }}
+            ts: ${{ fromJson(steps.slack.outputs.response).ts }}
             text: ":black_square_for_stop: :docker: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Cancelled container build for ${{inputs.REPOSITORY}} for <${{ steps.version.outputs.GITHUB_VERSION_URL_FOR_SLACK }}|${{ steps.version.outputs.VERSION }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"

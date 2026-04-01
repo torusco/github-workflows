@@ -126,33 +126,33 @@ jobs:
  
       - name: Slack Scan Complete
         if: ${{ success() && inputs.SLACK_CHANNEL_ID != '' }}
-        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1 Feb2026
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
-            ts: ${{ steps.slack.outputs.ts }}
+            ts: ${{ fromJson(steps.slack.outputs.response).ts }}
             text: ":check-passed: :shield: :${{ github.event.repository.name }}: Trivy vulnerability scan completed for ${{ inputs.REPOSITORY }} - No critical vulnerabilities found <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
 
       - name: Slack Scan Failure
         if: ${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}
-        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1 Feb2026
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
-            ts: ${{ steps.slack.outputs.ts }}
+            ts: ${{ fromJson(steps.slack.outputs.response).ts }}
             text: ":check-failed: :shield: :${{ github.event.repository.name }}: Trivy vulnerability scan failed for ${{ inputs.REPOSITORY }} - Vulnerabilities found or scan error <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
 
       - name: Slack Scan Cancelled
         if: ${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}
-        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 # v3.0.1 Feb2026
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
-            ts: ${{ steps.slack.outputs.ts }}
-            text: ":black_square_for_stop: :shield: :${{ github.event.repository.name }}: Trivy vulnerability scan cancelled for${{ inputs.REPOSITORY }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
+            ts: ${{ fromJson(steps.slack.outputs.response).ts }}
+            text: ":black_square_for_stop: :shield: :${{ github.event.repository.name }}: Trivy vulnerability scan cancelled for ${{ inputs.REPOSITORY }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
