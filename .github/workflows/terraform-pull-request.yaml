@@ -81,6 +81,9 @@ jobs:
       contents: read
 
     steps:
+      - name: checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 Jan2026
+
       - name: echo
         run: |
           echo AWS_REGION ${{ inputs.AWS_REGION }}
@@ -94,8 +97,6 @@ jobs:
           echo USES_CLOUDFLARE ${{ inputs.USES_CLOUDFLARE }}
           echo USES_FIVETRAN ${{ inputs.USES_FIVETRAN }}
           echo USES_STRIPE ${{ inputs.USES_STRIPE }}
-
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 Jan2026
 
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0 Feb2026
