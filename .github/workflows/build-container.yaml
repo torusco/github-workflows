@@ -89,6 +89,7 @@ jobs:
       - name: echo
         run: |
           echo AWS_REGION ${{ inputs.AWS_REGION }}
+          echo BUILD_ARGS ${{ inputs.BUILD_ARGS }}
           echo DOCKERFILE_FOLDER ${{ inputs.DOCKERFILE_FOLDER }}
           echo FROM_IMAGE ${{ inputs.FROM_IMAGE }}
           echo FORCE ${{ inputs.FORCE }}
