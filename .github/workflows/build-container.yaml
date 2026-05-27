@@ -52,6 +52,11 @@ on:
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
+
+      BUILD_ARGS:
+        description: additional build arguments to pass to docker build
+        type: string
+        required: false
   
     outputs:
       CONTAINER_BUILT:
@@ -185,6 +190,7 @@ jobs:
           tags: ${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:latest,${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:${{ steps.version.outputs.VERSION }}
           build-args: |
             FROM_IMAGE=${{ inputs.FROM_IMAGE }}
+            ${{ inputs.BUILD_ARGS }}
 
       - name: Build, tag, and push image to Amazon ECR
         if: inputs.FROM_IMAGE == '' && (inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true')
@@ -196,6 +202,7 @@ jobs:
           platforms: linux/arm64
           provenance: false
           tags: ${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:latest,${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:${{ steps.version.outputs.VERSION }}
+          build-args: ${{ inputs.BUILD_ARGS }}
 
       - name: Slack Build Complete
         if: ${{ inputs.SLACK_CHANNEL_ID != '' && (inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true')}}
