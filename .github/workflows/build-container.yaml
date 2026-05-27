@@ -8,6 +8,16 @@ on:
         type: string
         required: true
 
+      BUILD_ARGS:
+        description: additional build arguments to pass to docker build, pass as list
+        type: string
+        required: false
+
+      CONTAINER_VERSION:
+        description: the version of the container, if passed, does not look for version file
+        type: string
+        required: false
+
       DOCKERFILE_FOLDER:
         description: the folder containing the Dockerfile
         required: true
@@ -53,10 +63,6 @@ on:
         type: string
         required: true
 
-      BUILD_ARGS:
-        description: additional build arguments to pass to docker build
-        type: string
-        required: false
   
     outputs:
       CONTAINER_BUILT:
@@ -133,20 +139,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # copy in new version
-          rm ${{inputs.DOCKERFILE_FOLDER}}/version.py
-          cp ./version.py ${{inputs.DOCKERFILE_FOLDER}}/version.py
+          # use provided CONTAINER_VERSION or extract from version.py
+          if [ -n "${{ inputs.CONTAINER_VERSION }}" ]; then
+            VERSION="${{ inputs.CONTAINER_VERSION }}"
+          else
+            # copy in new version
+            rm ${{inputs.DOCKERFILE_FOLDER}}/version.py
+            cp ./version.py ${{inputs.DOCKERFILE_FOLDER}}/version.py
 
-          # get as a var
-          LINE=$(cat ${{inputs.DOCKERFILE_FOLDER}}/version.py | grep version)
-          VERSION=${LINE:11:-1}
+            # get as a var
+            LINE=$(cat ${{inputs.DOCKERFILE_FOLDER}}/version.py | grep version)
+            VERSION=${LINE:11:-1}
+          fi
 
           # get the version as used by release notes step
-          echo "VERSION=v$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "VERSION: $VERSION"
 
           # make link back to release notes
-          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/v$VERSION" >> $GITHUB_OUTPUT
+          echo "GITHUB_VERSION_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$VERSION" >> $GITHUB_OUTPUT
 
       - name: Slack Build Start
         id: slack
