@@ -193,6 +193,7 @@ jobs:
             FROM_IMAGE=${{ inputs.FROM_IMAGE }}
             ${{ inputs.BUILD_ARGS }}
 
+
       - name: Build, tag, and push image to Amazon ECR
         if: inputs.FROM_IMAGE == '' && (inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true')
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0 Feb2026
@@ -203,7 +204,9 @@ jobs:
           platforms: linux/arm64
           provenance: false
           tags: ${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:latest,${{ inputs.REGISTRY }}/${{ inputs.REPOSITORY }}:${{ steps.version.outputs.VERSION }}
-          build-args: ${{ inputs.BUILD_ARGS }}
+          build-args: |
+            ${{ inputs.BUILD_ARGS }}
+
 
       - name: Slack Build Complete
         if: ${{ inputs.SLACK_CHANNEL_ID != '' && (inputs.FORCE == true || steps.changed-container-files.outputs.any_changed == 'true')}}
