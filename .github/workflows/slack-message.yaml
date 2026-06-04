@@ -31,12 +31,10 @@ jobs:
 
       - name: Slack Message
         id: slack
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v3.0.1
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : "${{ inputs.MESSAGE }}"
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: "${{ inputs.MESSAGE }}"

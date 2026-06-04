@@ -125,7 +125,6 @@ jobs:
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo AWS_REGION ${{ inputs.AWS_REGION }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
-          echo "SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }}" >> $GITHUB_ENV  # was this debug or because slack was being weird in this file?
 
       - if: github.event.client_payload.ref != ''
         name: GITHUB_CHECKOUT_REF
@@ -218,15 +217,13 @@ jobs:
       - name: Slack Terraform Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v3.0.1
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":large_yellow_circle: :terraform: Terraforming! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: ":large_yellow_circle: :terraform: Terraforming! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Terraform Init
         run: |
@@ -250,39 +247,33 @@ jobs:
 
       - name: Slack Terraform Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v3.0.1
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":check-passed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-passed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack Terraform Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v3.0.1
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":check-failed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-failed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack Terraform Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v3.0.1
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":black_square_for_stop: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}          
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":black_square_for_stop: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "

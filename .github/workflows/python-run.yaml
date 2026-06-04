@@ -219,15 +219,13 @@ jobs:
       - name: Slack PY Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v3.0.1
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":large_yellow_circle: :python: Running! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: ":large_yellow_circle: :python: Running! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Python Run
         run: |
@@ -236,39 +234,33 @@ jobs:
           
       - name: Slack PY Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v3.0.1
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":check-passed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-passed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack PY Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v3.0.1
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":check-failed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":check-failed: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack Python Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v3.0.1
         with:
-          channel-id: ${{ inputs.SLACK_CHANNEL_ID }}
-          update-ts: ${{ steps.slack.outputs.ts }}
+          method: chat.update
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text" : ":black_square_for_stop: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            ts: ${{ steps.slack.outputs.ts }}
+            text: ":black_square_for_stop: :python: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.PY_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
