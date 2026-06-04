@@ -48,7 +48,7 @@ jobs:
 
     runs-on: ${{ inputs.RUNS_ON }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with: 
           token: ${{ secrets.NPM_TOKEN }} # matches github-torus-packages - repo, packages
 
@@ -61,7 +61,7 @@ jobs:
           provider: awsProduction
 
       - name: use github as yarn registry
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           registry-url: 'https://npm.pkg.github.com/'
@@ -82,7 +82,7 @@ jobs:
           echo "TF_VAR_CDK_PREFIX=${{ inputs.CDK_PREFIX }}" >> $GITHUB_ENV
 
       - name: Deployer Role
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}

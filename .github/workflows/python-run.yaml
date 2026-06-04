@@ -135,7 +135,7 @@ jobs:
 
       - if: github.event.client_payload.ref != ''
         name: actions/checkout@v3 client payload ref
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
           ref: ${{ github.event.client_payload.ref }}
@@ -149,12 +149,12 @@ jobs:
 
       - if: github.event.client_payload.ref == ''
         name: actions/checkout@v3 default ref
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.CHECKOUT_TOKEN }} # matches github-torus-packages - repo, packages
 
       - name: Set up Python ${{ inputs.PY_VERSION }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ inputs.PY_VERSION }}
             
@@ -188,7 +188,7 @@ jobs:
           echo "ENVIRONMENT_LONG_NAME=${{ inputs.ENVIRONMENT_LONG_NAME }}" >> $GITHUB_ENV
 
       - name: Deployer Role
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           aws-region: ${{ inputs.AWS_REGION }}
