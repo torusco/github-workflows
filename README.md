@@ -8,6 +8,18 @@
 * branches are named: v6, v7.1, v8, etc and they are not deleted when PRs are merged
 * PRs are only created when making a new major version to push the latest version to main before creating the new branch
 
+# v8.2
+
+Support docker containers deployed through cdk.
+
+* based on v8.1
+* Passes NPM token to CDK Deploy step
+
+## steps to migrate to this version
+
+1. Look for any local github workflows and update those first
+2. Switch to v8.1
+
 # v8.1
 
 An argument compatible Node 24 update.
