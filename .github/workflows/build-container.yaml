@@ -231,7 +231,7 @@ jobs:
             text: ":check-passed: :docker: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Published container ${{inputs.REPOSITORY}} for <${{ steps.version.outputs.GITHUB_VERSION_URL_FOR_SLACK }}|${{ steps.version.outputs.VERSION }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
 
       - name: Slack Build Failure
-        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' && steps.slack.outputs.response != '' }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
@@ -242,7 +242,7 @@ jobs:
             text: ":check-failed: :docker: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} Failed container build for ${{inputs.REPOSITORY}} for <${{ steps.version.outputs.GITHUB_VERSION_URL_FOR_SLACK }}|${{ steps.version.outputs.VERSION }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action>"
 
       - name: Slack Build Cancelled
-        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' && steps.slack.outputs.response != '' }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
