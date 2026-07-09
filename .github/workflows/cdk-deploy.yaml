@@ -37,6 +37,12 @@ on:
         type: string
         required: false
 
+      SLACK_ON_FAIL_ONLY:
+        description: "only send slack notification on failure - creating a quieter slack experience when set to true"
+        type: boolean
+        required: false
+        default: false
+
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
@@ -171,7 +177,7 @@ jobs:
 
       - name: Slack CDK Start
         id: slack
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == false }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.postMessage
@@ -186,7 +192,7 @@ jobs:
           ${{ inputs.YARN_DEPLOY_COMMAND }}
 
       - name: Slack CDK Complete
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == false }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
@@ -197,7 +203,7 @@ jobs:
             text: ":check-passed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack CDK Failure
-        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == false }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
@@ -207,8 +213,18 @@ jobs:
             ts: ${{ steps.slack.outputs.ts }}
             text: ":check-failed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
+      - name: Slack CDK On Failure Only
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == true }}"
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: ":check-failed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+
       - name: Slack CDK Cancelled
-        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == false }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
