@@ -18,6 +18,7 @@ An argument compatible Node 24 update.
 * terraform 1.14.8
 * python 3.12
 * Slack API to v3
+* SLACK_ON_FAIL_ONLY option for some deploy workflows (defaults to false)
 
 ## steps to migrate to this version
 
