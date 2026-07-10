@@ -35,6 +35,12 @@ on:
         type: string
         required: false
 
+      SLACK_ON_FAIL_ONLY:
+        description: "only send slack notification on failure - creating a quieter slack experience when set to true"
+        type: boolean
+        required: false
+        default: false
+
       TARGET_AWS_ACCOUNT_ROLE_ARN:
         type: string
         required: true
@@ -242,6 +248,7 @@ jobs:
           echo PY_VERSION ${{ inputs.PY_VERSION }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
           echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
+          echo SLACK_ON_FAIL_ONLY ${{ inputs.SLACK_ON_FAIL_ONLY }}
           echo TARGET_AWS_ACCOUNT_ROLE_ARN ${{ inputs.TARGET_AWS_ACCOUNT_ROLE_ARN }}
           echo TARGET_TERRAFORM_FOLDER_NAME ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }}
           echo TERRAFORM_RESOURCE_TO_REPLACE ${{ inputs.TERRAFORM_RESOURCE_TO_REPLACE }}
@@ -412,7 +419,7 @@ jobs:
 
       - name: Slack Terraform Start
         id: slack
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == false }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.postMessage
@@ -463,7 +470,7 @@ jobs:
           terraform apply ${{ inputs.ENVIRONMENT_LONG_NAME }}.out 
   
       - name: Slack Terraform Complete
-        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == false }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
@@ -474,7 +481,7 @@ jobs:
             text: ":check-passed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack Terraform Failure
-        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == false }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
@@ -484,8 +491,18 @@ jobs:
             ts: ${{ steps.slack.outputs.ts }}
             text: ":check-failed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
+      - name: Slack Terraform Failure Only
+        if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == true }}"
+        uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            text: ":check-failed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+
       - name: Slack Terraform Cancelled
-        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
+        if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == false }}"
         uses: slackapi/slack-github-action@af78098f536edbc4de71162a307590698245be95 #v3.0.1 Feb2026
         with:
           method: chat.update
