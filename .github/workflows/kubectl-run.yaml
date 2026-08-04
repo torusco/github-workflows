@@ -120,7 +120,6 @@ jobs:
         run: |
           cd ${{ inputs.KUBECTL_FOLDER_NAME }}
           ${{ inputs.KUBECTL_SCRIPT }}
-        continue-on-error: true
 
       - name: Slack Kubectl Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != ''}}"
