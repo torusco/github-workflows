@@ -11,7 +11,7 @@ on:
         description: "Version of kubectl to install"
         type: string
         required: false
-        default: 'v1.33.0'
+        default: 'v1.34.0'
 
       KUBECTL_FOLDER_NAME:
         description: "use this folder that contains the kubectl script and other files"
@@ -111,7 +111,7 @@ jobs:
             text: ":large_yellow_circle: :kubernetes: Running! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.KUBECTL_SCRIPT }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@15650b3ad78fff148532a140b8a4c821796b2d7b # v5.0.0 Mar2026
+        uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0 Apr 2026
         with:
           version: ${{ inputs.KUBECTL_VERSION }}
 
