@@ -1,4 +1,4 @@
-name: "Environment Gate Check v8.1"
+name: "Environment Gate Check v8.3"
 
 on:
   workflow_call:
@@ -20,12 +20,11 @@ on:
         required: false
         default: ubuntu-latest
 
-      SLACK_CHANNEL_ID:
-        type: string
-        required: true
-  
     secrets:
       SLACK_BOT_TOKEN:
+        required: true
+
+      SLACK_CHANNEL_ID:
         required: true
 
 jobs:
@@ -42,7 +41,6 @@ jobs:
         run: |
           echo CDK_PREFIX ${{ inputs.CDK_PREFIX }}
           echo RUNS_ON ${{ inputs.RUNS_ON }}
-          echo SLACK_CHANNEL_ID ${{ inputs.SLACK_CHANNEL_ID }}
           echo "GITHUB_RUN_URL_FOR_SLACK=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_ENV
           echo ${{ github.actor }}
           echo ${{ github.triggering_actor }}
@@ -70,7 +68,7 @@ jobs:
           method: chat.postMessage
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
             text: ":eyes: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} ${{ inputs.ADDITIONAL_APPROVAL_TEXT }} waiting for approval... <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> :click-here: <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "       
 
   environment_gate:
@@ -108,7 +106,7 @@ jobs:
           method: chat.update
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
             ts: ${{ env.TS}}
             text: ":check-passed: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} ${{ inputs.ADDITIONAL_APPROVAL_TEXT }} approved! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
         env:
@@ -121,7 +119,7 @@ jobs:
           method: chat.update
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            channel: ${{ inputs.SLACK_CHANNEL_ID }}
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
             ts: ${{ env.TS}}
             text: ":black_square_for_stop: :gate: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_PREFIX }} ${{ inputs.ADDITIONAL_APPROVAL_TEXT }} cancelled! <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}>  <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
         env:
