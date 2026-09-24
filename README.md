@@ -107,3 +107,10 @@ terraform-checkov example:
             NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 ```
+## cdk-deploy / terraform-apply
+
+### v9.1
+
+* Slack messages link the PR(s) that produced the deployed commit
+* When the deployed commit is a release commit (e.g. `v2.0.1230`), every PR since the previous release is linked
+* The lookup uses the caller's `GITHUB_TOKEN`: if the caller sets `permissions:`, include `contents: read` and `pull-requests: read`. Without them the link is omitted and the deploy still runs
