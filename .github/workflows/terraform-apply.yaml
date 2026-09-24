@@ -223,10 +223,25 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-            const { data: commit } = await github.rest.repos.getCommit({ owner, repo, ref: process.env.REF });
-            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: commit.sha });
-            const pr = prs.find(p => p.merge_commit_sha === commit.sha) || prs.find(p => p.merged_at) || prs[0];
-            core.exportVariable('GITHUB_PR_LINK_FOR_SLACK', pr ? `<${pr.html_url}|PR #${pr.number}>` : '');
+            const { data: commits } = await github.rest.repos.listCommits({ owner, repo, sha: process.env.REF, per_page: 30 });
+            const prFor = async sha => {
+              const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: sha });
+              return prs.find(p => p.merge_commit_sha === sha) || prs.find(p => p.merged_at) || prs[0];
+            };
+            // release commits (e.g. "v2.0.1230") have no PR: skip the deployed one, then collect PRs back to the previous one
+            const found = new Map();
+            let pr = await prFor(commits[0].sha);
+            if (pr) {
+              found.set(pr.number, pr);
+            } else {
+              for (const c of commits.slice(1)) {
+                pr = await prFor(c.sha);
+                if (!pr) break;
+                found.set(pr.number, pr);
+              }
+            }
+            const links = [...found.values()].reverse().map(p => `<${p.html_url}|#${p.number}>`);
+            core.exportVariable('GITHUB_PR_LINK_FOR_SLACK', links.length ? `PR ${links.join(', ')}` : '');
 
       - name: Slack Terraform Start
         id: slack
