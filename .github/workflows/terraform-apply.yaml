@@ -214,6 +214,20 @@ jobs:
         run: |
           echo "STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }}" >> $GITHUB_ENV
 
+      - name: Find PR for Slack
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        continue-on-error: true # never block a run on the PR lookup
+        uses: actions/github-script@v9
+        env:
+          REF: ${{ github.event.client_payload.ref_name || github.sha }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { data: commit } = await github.rest.repos.getCommit({ owner, repo, ref: process.env.REF });
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: commit.sha });
+            const pr = prs.find(p => p.merge_commit_sha === commit.sha) || prs.find(p => p.merged_at) || prs[0];
+            core.exportVariable('GITHUB_PR_LINK_FOR_SLACK', pr ? `<${pr.html_url}|PR #${pr.number}>` : '');
+
       - name: Slack Terraform Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
@@ -223,7 +237,7 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
-            text: ":large_yellow_circle: :terraform: Terraforming! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            text: ":large_yellow_circle: :terraform: Terraforming! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_PR_LINK_FOR_SLACK }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Terraform Init
         run: |
@@ -254,7 +268,7 @@ jobs:
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
             ts: ${{ steps.slack.outputs.ts }}
-            text: ":check-passed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            text: ":check-passed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> applied to ${{ env.TF_VAR_TORUS_ENVIRONMENT }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_PR_LINK_FOR_SLACK }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack Terraform Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
@@ -265,7 +279,7 @@ jobs:
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
             ts: ${{ steps.slack.outputs.ts }}
-            text: ":check-failed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            text: ":check-failed: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not applied to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_PR_LINK_FOR_SLACK }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack Terraform Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
@@ -276,4 +290,4 @@ jobs:
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
             ts: ${{ steps.slack.outputs.ts }}
-            text: ":black_square_for_stop: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            text: ":black_square_for_stop: :terraform: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.TARGET_TERRAFORM_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_PR_LINK_FOR_SLACK }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "

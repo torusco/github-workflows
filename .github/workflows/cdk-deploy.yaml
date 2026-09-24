@@ -156,6 +156,20 @@ jobs:
           aws-region: ${{ inputs.AWS_REGION }}
           role-duration-seconds: 3600
 
+      - name: Find PR for Slack
+        if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
+        continue-on-error: true # never block a run on the PR lookup
+        uses: actions/github-script@v9
+        env:
+          REF: ${{ github.event.client_payload.ref_name || github.sha }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { data: commit } = await github.rest.repos.getCommit({ owner, repo, ref: process.env.REF });
+            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({ owner, repo, commit_sha: commit.sha });
+            const pr = prs.find(p => p.merge_commit_sha === commit.sha) || prs.find(p => p.merged_at) || prs[0];
+            core.exportVariable('GITHUB_PR_LINK_FOR_SLACK', pr ? `<${pr.html_url}|PR #${pr.number}>` : '');
+
       - name: Slack CDK Start
         id: slack
         if: "${{ inputs.SLACK_CHANNEL_ID != '' }}"
@@ -165,7 +179,7 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
-            text: ":large_yellow_circle: :cdk: Deploying! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            text: ":large_yellow_circle: :cdk: Deploying! :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_PR_LINK_FOR_SLACK }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: CDK Deploy
         run: |
@@ -181,7 +195,7 @@ jobs:
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
             ts: ${{ steps.slack.outputs.ts }}
-            text: ":check-passed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            text: ":check-passed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_PR_LINK_FOR_SLACK }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack CDK Failure
         if: "${{ failure() && inputs.SLACK_CHANNEL_ID != '' }}"
@@ -192,7 +206,7 @@ jobs:
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
             ts: ${{ steps.slack.outputs.ts }}
-            text: ":check-failed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            text: ":check-failed: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> not deployed to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_PR_LINK_FOR_SLACK }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
 
       - name: Slack CDK Cancelled
         if: "${{ cancelled() && inputs.SLACK_CHANNEL_ID != '' }}"
@@ -203,4 +217,4 @@ jobs:
           payload: |
             channel: ${{ inputs.SLACK_CHANNEL_ID }}
             ts: ${{ steps.slack.outputs.ts }}
-            text: ":black_square_for_stop: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
+            text: ":black_square_for_stop: :cdk: :${{ github.event.repository.name }}: ${{ github.event.repository.name }} ${{ inputs.CDK_FOLDER_NAME }} <${{ env.GITHUB_VERSION_URL_FOR_SLACK }}|${{ env.GITHUB_CHECKOUT_REF }}> cancelled deploy to ${{ inputs.ENVIRONMENT_LONG_NAME }} ${{ inputs.CDK_PREFIX }} ${{ env.GITHUB_PR_LINK_FOR_SLACK }} <${{ env.GITHUB_RUN_URL_FOR_SLACK }}|Action> "
