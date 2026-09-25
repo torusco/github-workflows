@@ -19,6 +19,9 @@ An argument compatible Node 24 update.
 * python 3.12
 * Slack API to v3
 * SLACK_ON_FAIL_ONLY option for some deploy workflows (defaults to false)
+* `cdk-deploy.yaml` passes `NPM_TOKEN` (also as `NODE_AUTH_TOKEN`) to the CDK Deploy step, for stacks
+  that build a container during deploy and install `@torusco` packages in it. This replaces v8.2,
+  which existed only for this change; move any `@v8.2` reference to `@v8.1`.
 
 ## steps to migrate to this version
 
