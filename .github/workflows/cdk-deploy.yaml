@@ -191,6 +191,11 @@ jobs:
         run: |
           cd ${{ inputs.YARN_FOLDER_NAME }}
           ${{ inputs.YARN_DEPLOY_COMMAND }}
+        # For stacks that build a container during deploy and install @torusco packages in it
+        # (e.g. web-experiences' Lasso app passes NPM_TOKEN into its Docker build as a secret).
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Slack CDK Complete
         if: "${{ inputs.SLACK_CHANNEL_ID != '' && inputs.SLACK_ON_FAIL_ONLY == false }}"
